@@ -1,0 +1,61 @@
+const path = require('node:path');
+const crypto = require('node:crypto');
+const express = require('express');
+const session = require('express-session');
+const helmet = require('helmet');
+const { initDatabase } = require('./config/database');
+const SQLiteSessionStore = require('./config/sessionStore');
+const apiRoutes = require('./routes');
+const { notFound, errorHandler } = require('./middleware/errorHandler');
+
+function createApp(options = {}) {
+  const app = express();
+  const { database, databasePath } = initDatabase(options.databaseFile);
+  const sessionStore = new SQLiteSessionStore(database);
+  const frontendPath = path.join(__dirname, '..', 'frontend');
+
+  app.disable('x-powered-by');
+  app.use(helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'"],
+        styleSrc: ["'self'"],
+        fontSrc: ["'self'"],
+        imgSrc: ["'self'", 'data:'],
+        connectSrc: ["'self'"]
+      }
+    }
+  }));
+  app.use(express.json({ limit: '100kb' }));
+  app.use(express.urlencoded({ extended: false }));
+  app.use(session({
+    name: 'izinpro.sid',
+    secret: process.env.SESSION_SECRET || crypto.randomBytes(32).toString('hex'),
+    store: sessionStore,
+    resave: false,
+    saveUninitialized: false,
+    rolling: true,
+    cookie: {
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: false,
+      maxAge: 1000 * 60 * 60 * 8
+    }
+  }));
+
+  app.use('/api', apiRoutes);
+  app.use('/icons', express.static(path.join(__dirname, '..', 'node_modules', 'lucide-static', 'icons'), { maxAge: '7d' }));
+  app.use('/vendor/inter', express.static(path.join(__dirname, '..', 'node_modules', '@fontsource', 'inter'), { maxAge: '7d' }));
+  app.use(express.static(frontendPath, { extensions: ['html'] }));
+  app.get('/', (_req, res) => res.sendFile(path.join(frontendPath, 'login.html')));
+
+  app.use(notFound);
+  app.use(errorHandler);
+
+  app.locals.databasePath = databasePath;
+  app.locals.sessionStore = sessionStore;
+  return app;
+}
+
+module.exports = { createApp };

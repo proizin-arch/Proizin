@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="İzinPro yönetim paneli">
+  <title>İzinPro</title>
+  <link rel="stylesheet" href="/vendor/inter/400.css"><link rel="stylesheet" href="/vendor/inter/500.css"><link rel="stylesheet" href="/vendor/inter/600.css"><link rel="stylesheet" href="/vendor/inter/700.css">
+  <link rel="stylesheet" href="/css/base.css"><link rel="stylesheet" href="/css/dashboard.css">
+</head>
+<body class="app-page">
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand"><img src="/assets/logo-mark.svg" alt=""><span>İzinPro</span></div>
+      <nav class="side-nav" id="side-nav" aria-label="Ana menü"></nav>
+      <div class="sidebar-footer"><button id="logout-button" class="nav-item nav-logout" type="button"><img src="/icons/log-out.svg" alt=""><span>Çıkış Yap</span></button></div>
+    </aside>
+    <div class="sidebar-scrim" id="sidebar-scrim"></div>
+    <section class="workspace">
+      <header class="topbar">
+        <div class="topbar-title"><button class="mobile-menu" id="mobile-menu" type="button" aria-label="Menüyü aç"><img src="/icons/menu.svg" alt=""></button><div><span id="page-eyebrow">İZİNPRO</span><h1 id="page-title">Ana Sayfa</h1></div></div>
+        <div class="account-summary"><div class="account-text"><strong id="account-name">—</strong><span id="account-position">—</span></div><span class="role-badge" id="role-badge">—</span><div class="avatar" id="account-avatar">—</div></div>
+      </header>
+      <main class="main-content" id="main-content"><div class="page-loading"><span class="spinner"></span><p>Bilgiler yükleniyor…</p></div></main>
+    </section>
+  </div>
+
+  <div class="drawer-backdrop" id="drawer-backdrop" hidden></div>
+  <aside class="drawer" id="drawer" aria-modal="true" role="dialog" aria-labelledby="drawer-title" hidden><header><div><span class="eyebrow" id="drawer-eyebrow">İZİNPRO</span><h2 id="drawer-title">Detay</h2></div><button class="icon-button" id="drawer-close" type="button" aria-label="Kapat"><img src="/icons/x.svg" alt=""></button></header><div class="drawer-body" id="drawer-body"></div></aside>
+  <div class="modal-backdrop" id="modal-backdrop" hidden><section class="confirm-modal" role="dialog" aria-modal="true" aria-labelledby="confirm-title"><div class="confirm-icon"><img src="/icons/triangle-alert.svg" alt=""></div><h2 id="confirm-title">İşlemi onaylayın</h2><p id="confirm-message"></p><div class="modal-actions"><button class="button button-secondary" id="confirm-cancel" type="button">Vazgeç</button><button class="button button-danger" id="confirm-ok" type="button">Onayla</button></div></section></div>
+  <div class="toast-region" id="toast-region" aria-live="polite"></div>
+
+  <script src="/js/api.js"></script><script src="/js/ui.js"></script><script src="/js/leave.js"></script><script src="/js/admin.js"></script><script src="/js/profile.js"></script><script src="/js/dashboard.js"></script>
+</body>
+</html>

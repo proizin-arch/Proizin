@@ -1,0 +1,8 @@
+node_modules/
+.env
+backend/database/*.db
+backend/database/*.db-shm
+backend/database/*.db-wal
+coverage/
+.DS_Store
+npm-debug.log*

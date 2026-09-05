@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="İzinPro personel izin yönetim sistemi">
+  <title>Giriş Yap | İzinPro</title>
+  <link rel="stylesheet" href="/vendor/inter/400.css">
+  <link rel="stylesheet" href="/vendor/inter/500.css">
+  <link rel="stylesheet" href="/vendor/inter/600.css">
+  <link rel="stylesheet" href="/vendor/inter/700.css">
+  <link rel="stylesheet" href="/css/base.css">
+  <link rel="stylesheet" href="/css/login.css">
+</head>
+<body class="auth-page">
+  <main class="auth-shell">
+    <section class="auth-visual" aria-label="İzinPro tanıtımı">
+      <a class="brand" href="/" aria-label="İzinPro ana sayfa">
+        <img src="/assets/logo-mark.svg" alt="" width="44" height="44">
+        <span>İzinPro</span>
+      </a>
+      <div class="visual-copy">
+        <span class="eyebrow">PERSONEL İZİN YÖNETİMİ</span>
+        <h1>İzin süreçleri<br>tek yerde, kolayca.</h1>
+        <p>Talebinizi oluşturun, durumunu takip edin ve ekibinizin izin süreçlerini düzenli yönetin.</p>
+      </div>
+      <div class="calendar-art" aria-hidden="true">
+        <div class="calendar-ring ring-one"></div><div class="calendar-ring ring-two"></div>
+        <div class="calendar-head"><span>Eylül 2026</span><span class="art-badge">Planlı</span></div>
+        <div class="calendar-week"><span>Pzt</span><span>Sal</span><span>Çar</span><span>Per</span><span>Cum</span></div>
+        <div class="calendar-grid">
+          <span></span><span>1</span><span>2</span><span>3</span><span>4</span>
+          <span>7</span><span>8</span><span class="selected">9</span><span class="selected">10</span><span class="selected end">11</span>
+          <span>14</span><span>15</span><span>16</span><span>17</span><span>18</span>
+        </div>
+        <div class="approval-pill"><img src="/icons/circle-check.svg" alt=""><span><b>Talep onaylandı</b><small>2 iş günü</small></span></div>
+      </div>
+      <div class="visual-foot"><img src="/icons/shield-check.svg" alt=""> Verileriniz yalnızca bu bilgisayarda saklanır.</div>
+    </section>
+
+    <section class="auth-panel">
+      <div class="auth-card">
+        <div class="mobile-brand brand"><img src="/assets/logo-mark.svg" alt=""><span>İzinPro</span></div>
+        <div class="auth-heading">
+          <span class="eyebrow">HOŞ GELDİNİZ</span>
+          <h2>Hesabınıza giriş yapın</h2>
+          <p>Devam etmek için e-posta adresinizi ve şifrenizi girin.</p>
+        </div>
+        <form id="login-form" novalidate>
+          <div class="field">
+            <label for="email">E-posta</label>
+            <div class="input-wrap"><img src="/icons/mail.svg" alt=""><input id="email" name="email" type="email" autocomplete="email" placeholder="ornek@izinpro.local" required></div>
+          </div>
+          <div class="field">
+            <label for="password">Şifre</label>
+            <div class="input-wrap"><img src="/icons/lock-keyhole.svg" alt=""><input id="password" name="password" type="password" autocomplete="current-password" placeholder="Şifrenizi girin" required><button class="icon-button password-toggle" type="button" aria-label="Şifreyi göster"><img src="/icons/eye.svg" alt=""></button></div>
+          </div>
+          <label class="check-row"><input id="remember" name="remember" type="checkbox"><span>Beni hatırla</span></label>
+          <p class="form-error" id="form-error" role="alert" hidden></p>
+          <button class="button button-primary button-block" type="submit"><span>Giriş Yap</span><img src="/icons/arrow-right.svg" alt=""></button>
+        </form>
+        <div class="auth-divider"><span>veya</span></div>
+        <a class="button button-secondary button-block" href="/register.html"><img src="/icons/user-plus.svg" alt=""><span>Yeni hesap oluştur</span></a>
+        <p class="auth-note">Rolünüz giriş sonrasında sistem tarafından otomatik belirlenir.</p>
+      </div>
+    </section>
+  </main>
+  <script src="/js/api.js"></script>
+  <script src="/js/login.js"></script>
+</body>
+</html>
