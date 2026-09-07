@@ -2,7 +2,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const root = path.resolve(__dirname, '..');
-const output = path.join(root, '.netlify-dist');
+const output = path.join(root, '.cloudflare-dist');
 
 fs.rmSync(output, { recursive: true, force: true });
 fs.cpSync(path.join(root, 'frontend'), output, { recursive: true });
@@ -18,4 +18,4 @@ fs.cpSync(
 );
 fs.copyFileSync(path.join(root, 'frontend', 'login.html'), path.join(output, 'index.html'));
 
-console.log('Netlify yayın klasörü hazır: .netlify-dist');
+console.log('Cloudflare yayın klasörü hazır: .cloudflare-dist');

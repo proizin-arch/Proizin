@@ -1,6 +1,6 @@
 # İzinPro
 
-İzinPro; personel izin taleplerini oluşturmak, takip etmek ve yönetmek için hazırlanmış bir web uygulamasıdır. Proje iki çalışma biçimini birlikte destekler: bilgisayarda Node.js + SQLite ile yerel kullanım ve Netlify Functions + PostgreSQL ile internet yayını.
+İzinPro; personel izin taleplerini oluşturmak, takip etmek ve yönetmek için hazırlanmış bir web uygulamasıdır. Proje iki çalışma biçimini birlikte destekler: bilgisayarda Node.js + SQLite ile yerel kullanım ve Cloudflare Workers + D1 ile internet yayını.
 
 Bu teslim paketindeki program kodu güncel sürümdür. ZIP'in içinde güvenli bir demo veritabanı bulunur. Bu nedenle ekranlar ve bütün özellikler güncel sistemle aynıdır; yalnızca örnek kullanıcılar ve örnek izin kayıtları geliştirici bilgisayarındaki çalışma verilerinden farklı olabilir.
 
@@ -105,15 +105,14 @@ Oluşturulan kullanıcılar, şifre değişiklikleri, departmanlar, pozisyonlar 
 
 Önemli: Güncel ZIP daha sonra aynı klasörün üzerine tekrar çıkartılırsa demo veritabanı mevcut veritabanının üzerine yazılabilir. Güncelleme yapmadan önce `backend\database\izinpro.db` dosyasını başka bir yere kopyalayarak yedekleyin.
 
-Netlify yayınında yerel SQLite dosyası kullanılmaz. Kullanıcılar, oturumlar, departmanlar, pozisyonlar ve izin kayıtları kalıcı PostgreSQL veritabanında tutulur. Veritabanı bağlantısı ve güvenlik anahtarları GitHub'a yazılmaz; Netlify ortam değişkenlerinde saklanır.
+Cloudflare yayınında yerel SQLite dosyası kullanılmaz. Kullanıcılar, oturumlar, departmanlar, pozisyonlar ve izin kayıtları kalıcı Cloudflare D1 veritabanında tutulur. Güvenlik anahtarları GitHub'a yazılmaz; Cloudflare secret olarak saklanır.
 
 ## İnternet yayını
 
-Canlı sürüm GitHub deposundan Netlify'a otomatik dağıtılır. `main` dalına gönderilen her onaylı güncellemede Netlify projeyi yeniden kurar. Yayın ayarları `netlify.toml`, statik paketleme `scripts/build-netlify.js`, API girişi ise `netlify/functions/api.js` dosyasındadır.
+Canlı sürüm doğrudan Cloudflare üzerindedir: ön yüz Workers Static Assets'ten, Node.js/Express backend Worker'dan ve kalıcı veriler D1'dan sunulur. Canlı adres `https://proizin.izinpro.workers.dev` adresidir. Yayın ayarları `cloudflare/wrangler.jsonc`, statik paketleme `scripts/build-cloudflare.js`, Worker girişi ise `cloudflare/app-worker.js` dosyasındadır.
 
 Canlı ortamda zorunlu gizli değerler:
 
-- `NETLIFY_DB_URL`: Kalıcı PostgreSQL bağlantı adresi
 - `SESSION_SECRET`: Oturum imzalama anahtarı
 - `TEMP_PASSWORD_KEY`: Geçici kullanıcı şifrelerini şifreleme anahtarı
 
@@ -182,14 +181,14 @@ IzinPro.sln             Microsoft Visual Studio çözümü
 IzinPro.esproj          Node.js proje tanımı
 KURULUM.bat             İlk paket kurulumu ve testler
 BASLAT.bat              Hızlı çalıştırma dosyası
-backend/                Node.js API, yerel SQLite ve canlı PostgreSQL desteği
+backend/                Node.js API ve yerel SQLite desteği
 frontend/               Programın ekranları ve tasarımı
-netlify/                Netlify Functions API girişi
-netlify.toml            Netlify derleme, yönlendirme ve güvenlik ayarları
+cloudflare/             Worker, D1 migration ve yayın ayarları
+scripts/build-cloudflare.js  Cloudflare statik dosya derlemesi
 tests/                  Otomatik sistem testleri
 package.json            Node.js komutları ve bağımlılıkları
 ```
 
-Teknik akış `Route → Controller → Service → Repository → SQLite/PostgreSQL` şeklindedir. Backend Node.js/Express ile, kullanıcı arayüzü HTML, CSS ve JavaScript ile hazırlanmıştır.
+Teknik akış `Route → Controller → Service → Repository → SQLite/D1` şeklindedir. Backend Node.js/Express ile, kullanıcı arayüzü HTML, CSS ve JavaScript ile hazırlanmıştır.
 
 Daha ayrıntılı Microsoft Visual Studio açıklaması için `VISUAL-STUDIO-KURULUM.md` dosyasına bakabilirsiniz.

@@ -1,4 +1,4 @@
-const bcrypt = require('bcrypt');
+const bcrypt = require('../utils/passwordHasher');
 const userRepository = require('../repositories/userRepository');
 const departmentRepository = require('../repositories/departmentRepository');
 const positionService = require('./positionService');

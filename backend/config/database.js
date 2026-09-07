@@ -1,25 +1,14 @@
 const fs = require('node:fs');
 const path = require('node:path');
-const Database = require('better-sqlite3');
 const { seedSystemDefaults } = require('../database/seed');
-const PostgresDatabase = require('./postgresAdapter');
 
 let database;
 let databaseReady = Promise.resolve();
 
-function postgresUrl() {
-  return process.env.NETLIFY_DB_URL || process.env.DATABASE_URL;
-}
-
-function initPostgres() {
-  const { Pool } = require('pg');
-  const pool = new Pool({ connectionString: postgresUrl(), max: 5 });
-  database = new PostgresDatabase(pool);
-  // Netlify applies versioned migrations during deployment. Running the seed
-  // migration on every serverless cold start would recreate demo records after
-  // a factory reset, so runtime startup only verifies the connection.
-  databaseReady = pool.query('SELECT 1').then(() => undefined);
-  return { database, databasePath: 'postgresql', ready: databaseReady };
+function useDatabase(databaseInstance, ready = Promise.resolve()) {
+  database = databaseInstance;
+  databaseReady = ready;
+  return { database, databasePath: 'runtime-database', ready: databaseReady };
 }
 
 function resolveDatabasePath(customPath) {
@@ -28,11 +17,10 @@ function resolveDatabasePath(customPath) {
 }
 
 function initDatabase(customPath) {
-  if (!customPath && postgresUrl()) {
-    if (database?.isPostgres) return { database, databasePath: 'postgresql', ready: databaseReady };
-    return initPostgres();
-  }
-
+  // Local and Visual Studio usage stores data in SQLite. Cloudflare passes a
+  // D1 adapter through useDatabase(), so the native module is not initialized
+  // inside the Worker runtime.
+  const Database = require('better-sqlite3');
   if (database) {
     database.close();
   }
@@ -106,4 +94,4 @@ function readyDatabase() {
   return databaseReady;
 }
 
-module.exports = { initDatabase, getDatabase, closeDatabase, resolveDatabasePath, readyDatabase };
+module.exports = { initDatabase, useDatabase, getDatabase, closeDatabase, resolveDatabasePath, readyDatabase };

@@ -76,7 +76,7 @@ test('ilk kurulum gerçek admini oluşturur ve örnek veri üretmez', async () =
   assert.equal(response.body.data.mustChangePassword, false);
 
   const row = getDatabase().prepare('SELECT password_hash FROM users WHERE email = ?').get(credentials.admin[0]);
-  assert.match(row.password_hash, /^\$2[aby]\$/);
+  assert.match(row.password_hash, /^(?:\$2[aby]\$|pbkdf2-sha256\$)/);
   assert.notEqual(row.password_hash, credentials.admin[1]);
   assert.equal(getDatabase().prepare('SELECT COUNT(*) AS count FROM departments').get().count, 0);
   assert.equal(getDatabase().prepare('SELECT COUNT(*) AS count FROM positions').get().count, 1);

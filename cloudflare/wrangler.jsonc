@@ -1,0 +1,22 @@
+{
+  "name": "proizin",
+  "main": "app-worker.js",
+  "compatibility_date": "2026-09-07",
+  "workers_dev": true,
+  "assets": {
+    "directory": "../.cloudflare-dist",
+    "binding": "ASSETS",
+    "run_worker_first": ["/api/*"]
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "proizin-db",
+      "database_id": "1bf879d1-14b4-4c7a-aa4d-e1f2b2d03bf6",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "observability": {
+    "enabled": true
+  }
+}

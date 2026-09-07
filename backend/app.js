@@ -3,7 +3,7 @@ const crypto = require('node:crypto');
 const express = require('express');
 const session = require('express-session');
 const helmet = require('helmet');
-const { initDatabase } = require('./config/database');
+const { initDatabase, useDatabase } = require('./config/database');
 const credentialVault = require('./utils/credentialVault');
 const settingsRepository = require('./repositories/settingsRepository');
 const SQLiteSessionStore = require('./config/sessionStore');
@@ -12,10 +12,14 @@ const { notFound, errorHandler } = require('./middleware/errorHandler');
 
 function createApp(options = {}) {
   const app = express();
-  const { database, databasePath, ready } = initDatabase(options.databaseFile);
+  const initialized = options.database
+    ? useDatabase(options.database, options.ready || Promise.resolve())
+    : initDatabase(options.databaseFile);
+  const { database, ready } = initialized;
+  const databasePath = options.databasePath || initialized.databasePath;
   credentialVault.configure(databasePath);
   const sessionStore = new SQLiteSessionStore(database);
-  const frontendPath = path.join(__dirname, '..', 'frontend');
+  const frontendPath = options.apiOnly ? null : path.join(__dirname, '..', 'frontend');
 
   app.disable('x-powered-by');
   app.use(helmet({
@@ -32,8 +36,20 @@ function createApp(options = {}) {
   }));
   app.use(express.json({ limit: '100kb' }));
   app.use(express.urlencoded({ extended: false }));
+  if (options.asciiJson) {
+    app.use((_req, res, next) => {
+      res.json = (body) => {
+        const serialized = JSON.stringify(body).replace(/[\u007f-\uffff]/g, (character) =>
+          `\\u${character.charCodeAt(0).toString(16).padStart(4, '0')}`
+        ) + '\n';
+        res.type('application/json');
+        return res.send(serialized);
+      };
+      next();
+    });
+  }
   app.use((req, _res, next) => Promise.resolve(ready).then(() => next(), next));
-  if (process.env.NETLIFY) app.set('trust proxy', 1);
+  if (options.trustProxy) app.set('trust proxy', 1);
   app.use(session({
     name: 'izinpro.sid',
     secret: process.env.SESSION_SECRET || crypto.randomBytes(32).toString('hex'),
@@ -44,24 +60,26 @@ function createApp(options = {}) {
     cookie: {
       httpOnly: true,
       sameSite: 'lax',
-      secure: process.env.CONTEXT === 'production',
+      secure: options.secureCookies ?? process.env.CONTEXT === 'production',
       maxAge: 1000 * 60 * 60 * 8
     }
   }));
 
   app.use('/api', apiRoutes);
-  app.use('/icons', express.static(path.join(__dirname, '..', 'node_modules', 'lucide-static', 'icons'), { maxAge: '7d' }));
-  app.use('/vendor/inter', express.static(path.join(__dirname, '..', 'node_modules', '@fontsource', 'inter'), { maxAge: '7d' }));
-  app.get(['/', '/login.html'], async (_req, res) => {
-    const file = (await settingsRepository.get())?.isConfigured ? 'login.html' : 'setup.html';
-    res.sendFile(path.join(frontendPath, file));
-  });
-  app.get(['/register', '/register.html'], (_req, res) => res.redirect(302, '/login.html'));
-  app.get('/setup.html', async (_req, res) => {
-    const file = (await settingsRepository.get())?.isConfigured ? 'login.html' : 'setup.html';
-    res.sendFile(path.join(frontendPath, file));
-  });
-  app.use(express.static(frontendPath, { extensions: ['html'] }));
+  if (!options.apiOnly) {
+    app.use('/icons', express.static(path.join(__dirname, '..', 'node_modules', 'lucide-static', 'icons'), { maxAge: '7d' }));
+    app.use('/vendor/inter', express.static(path.join(__dirname, '..', 'node_modules', '@fontsource', 'inter'), { maxAge: '7d' }));
+    app.get(['/', '/login.html'], async (_req, res) => {
+      const file = (await settingsRepository.get())?.isConfigured ? 'login.html' : 'setup.html';
+      res.sendFile(path.join(frontendPath, file));
+    });
+    app.get(['/register', '/register.html'], (_req, res) => res.redirect(302, '/login.html'));
+    app.get('/setup.html', async (_req, res) => {
+      const file = (await settingsRepository.get())?.isConfigured ? 'login.html' : 'setup.html';
+      res.sendFile(path.join(frontendPath, file));
+    });
+    app.use(express.static(frontendPath, { extensions: ['html'] }));
+  }
 
   app.use(notFound);
   app.use(errorHandler);
