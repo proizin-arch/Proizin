@@ -15,7 +15,7 @@ function initPostgres() {
   const { Pool } = require('pg');
   const pool = new Pool({ connectionString: postgresUrl(), max: 5 });
   database = new PostgresDatabase(pool);
-  const schemaPath = path.join(__dirname, '..', 'database', 'postgres-schema.sql');
+  const schemaPath = path.join(__dirname, '..', '..', 'netlify', 'database', 'migrations', '0001_initial.sql');
   databaseReady = database.exec(fs.readFileSync(schemaPath, 'utf8'));
   return { database, databasePath: 'postgresql', ready: databaseReady };
 }
