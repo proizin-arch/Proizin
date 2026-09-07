@@ -15,8 +15,10 @@ function initPostgres() {
   const { Pool } = require('pg');
   const pool = new Pool({ connectionString: postgresUrl(), max: 5 });
   database = new PostgresDatabase(pool);
-  const schemaPath = path.join(__dirname, '..', '..', 'netlify', 'database', 'migrations', '0001_initial.sql');
-  databaseReady = database.exec(fs.readFileSync(schemaPath, 'utf8'));
+  // Netlify applies versioned migrations during deployment. Running the seed
+  // migration on every serverless cold start would recreate demo records after
+  // a factory reset, so runtime startup only verifies the connection.
+  databaseReady = pool.query('SELECT 1').then(() => undefined);
   return { database, databasePath: 'postgresql', ready: databaseReady };
 }
 

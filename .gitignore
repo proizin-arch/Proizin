@@ -1,6 +1,7 @@
 node_modules/
 .netlify/
 .netlify-dist/
+deno.lock
 .vs/
 obj/
 *.esproj.user

@@ -44,7 +44,7 @@ function createApp(options = {}) {
     cookie: {
       httpOnly: true,
       sameSite: 'lax',
-      secure: Boolean(process.env.NETLIFY),
+      secure: process.env.CONTEXT === 'production',
       maxAge: 1000 * 60 * 60 * 8
     }
   }));
