@@ -4,7 +4,7 @@
   form.hireDate.value = new Date().toISOString().slice(0, 10);
 
   Api.get('/api/setup/status').then((status) => {
-    if (status.isConfigured) window.location.replace('/login.html');
+    if (status.isConfigured) window.location.replace(Portal.url('/login.html'));
   }).catch(() => {});
 
   form.addEventListener('submit', async (event) => {
@@ -22,7 +22,7 @@
       const payload = Object.fromEntries(new FormData(form).entries());
       delete payload.passwordConfirm;
       await Api.post('/api/setup/complete', payload);
-      window.location.replace('/Dashboard.html');
+      window.location.replace(Portal.url('/Dashboard.html'));
     } catch (error) {
       errorBox.textContent = error.message;
       errorBox.hidden = false;

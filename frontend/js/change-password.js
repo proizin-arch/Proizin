@@ -3,8 +3,8 @@
   const errorBox = document.getElementById('form-error');
 
   Api.get('/api/auth/me').then((user) => {
-    if (!user.mustChangePassword) window.location.replace('/Dashboard.html');
-  }).catch(() => window.location.replace('/login.html'));
+    if (!user.mustChangePassword) window.location.replace(Portal.url('/Dashboard.html'));
+  }).catch(() => window.location.replace(Portal.url('/login.html')));
 
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
@@ -18,7 +18,7 @@
     button.disabled = true;
     try {
       await Api.post('/api/auth/change-password', { newPassword: form.newPassword.value });
-      window.location.replace('/Dashboard.html');
+      window.location.replace(Portal.url('/Dashboard.html'));
     } catch (error) {
       errorBox.textContent = error.message;
       errorBox.hidden = false;
@@ -37,6 +37,6 @@
   });
 
   document.getElementById('logout-button').addEventListener('click', async () => {
-    try { await Api.post('/api/auth/logout'); } finally { window.location.replace('/login.html'); }
+    try { await Api.post('/api/auth/logout'); } finally { window.location.replace(Portal.url('/login.html')); }
   });
 })();

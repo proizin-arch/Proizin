@@ -111,10 +111,20 @@ Cloudflare yayınında yerel SQLite dosyası kullanılmaz. Kullanıcılar, oturu
 
 Canlı sürüm doğrudan Cloudflare üzerindedir: ön yüz Workers Static Assets'ten, Node.js/Express backend Worker'dan ve kalıcı veriler D1'dan sunulur. Canlı adres `https://proizin.izinpro.workers.dev` adresidir. Yayın ayarları `cloudflare/wrangler.jsonc`, statik paketleme `scripts/build-cloudflare.js`, Worker girişi ise `cloudflare/app-worker.js` dosyasındadır.
 
+Aynı tarayıcıda birbirinden bağımsız üç oturum açmak için:
+
+- Admin: `https://proizin.izinpro.workers.dev/admin`
+- Yönetici: `https://proizin.izinpro.workers.dev/yonetici`
+- Personel: `https://proizin.izinpro.workers.dev/personel`
+
+Ana adres tek hesaplık normal giriş olarak çalışmaya devam eder. Dört giriş biçimi de
+aynı Cloudflare D1 veritabanını kullanır.
+
 Canlı ortamda zorunlu gizli değerler:
 
 - `SESSION_SECRET`: Oturum imzalama anahtarı
 - `TEMP_PASSWORD_KEY`: Geçici kullanıcı şifrelerini şifreleme anahtarı
+- `PASSWORD_PEPPER`: Cloudflare parola hashlerini veritabanından bağımsız güçlendiren anahtar
 
 Bu değerler `.env` dosyasına veya GitHub deposuna eklenmemelidir.
 

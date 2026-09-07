@@ -1,4 +1,5 @@
 const authService = require('../services/authService');
+const AppError = require('../utils/AppError');
 
 function regenerateSession(req) {
   return new Promise((resolve, reject) => {
@@ -8,6 +9,9 @@ function regenerateSession(req) {
 
 async function login(req, res) {
   const user = await authService.login(req.body.email, req.body.password);
+  if (req.portalRole && user.role !== req.portalRole) {
+    throw new AppError('Bu giriş ekranı hesabınızın rolüyle eşleşmiyor.', 403);
+  }
   await regenerateSession(req);
   req.session.userId = user.id;
   req.session.cookie.maxAge = req.body.remember ? 1000 * 60 * 60 * 24 * 14 : 1000 * 60 * 60 * 8;
@@ -17,7 +21,7 @@ async function login(req, res) {
 function logout(req, res, next) {
   req.session.destroy((error) => {
     if (error) return next(error);
-    res.clearCookie('izinpro.sid');
+    res.clearCookie(req.sessionCookieName || 'izinpro.sid', { path: req.sessionCookiePath || '/' });
     res.json({ success: true, data: null });
   });
 }

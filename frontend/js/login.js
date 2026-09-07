@@ -5,7 +5,7 @@
   const toggle = document.querySelector('.password-toggle');
 
   Api.get('/api/setup/status').then((status) => {
-    if (!status.isConfigured) window.location.replace('/setup.html');
+    if (!status.isConfigured) window.location.replace(Portal.url('/setup.html'));
     const organization = document.getElementById('login-organization');
     if (organization && status.settings?.organizationName) {
       organization.textContent = status.settings.organizationName;
@@ -13,7 +13,7 @@
     }
   }).catch(() => {});
   Api.get('/api/auth/me').then((user) => {
-    window.location.replace(user.mustChangePassword ? '/change-password.html' : '/Dashboard.html');
+    window.location.replace(Portal.url(user.mustChangePassword ? '/change-password.html' : '/Dashboard.html'));
   }).catch(() => {});
 
   toggle.addEventListener('click', () => {
@@ -35,7 +35,7 @@
         password: form.password.value,
         remember: form.remember.checked
       });
-      window.location.replace(user.mustChangePassword ? '/change-password.html' : '/Dashboard.html');
+      window.location.replace(Portal.url(user.mustChangePassword ? '/change-password.html' : '/Dashboard.html'));
     } catch (error) {
       errorBox.textContent = error.message;
       errorBox.hidden = false;

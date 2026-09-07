@@ -395,6 +395,31 @@ test('admin, yönetici ve personel ayrı oturumlarda aynı anda çalışabilir',
   assert.deepEqual(responses.map((response) => response.body.data.role), ['ADMIN', 'MANAGER', 'PERSONNEL']);
 });
 
+test('rol portalları farklı oturum çerezleri kullanır ve yanlış rolü reddeder', async () => {
+  const database = getDatabase();
+  const adminPortal = createApp({
+    database, databasePath: 'test', sessionName: 'izinpro.admin.sid',
+    sessionPath: '/admin', apiPrefix: '/admin/api', portalRole: 'ADMIN'
+  });
+  const managerPortal = createApp({
+    database, databasePath: 'test', sessionName: 'izinpro.manager.sid',
+    sessionPath: '/yonetici', apiPrefix: '/yonetici/api', portalRole: 'MANAGER'
+  });
+
+  const adminLogin = await request(adminPortal).post('/admin/api/auth/login').send({
+    email: credentials.admin[0], password: credentials.admin[1]
+  });
+  assert.equal(adminLogin.status, 200, adminLogin.text);
+  assert.match(adminLogin.headers['set-cookie'][0], /^izinpro\.admin\.sid=/);
+  assert.match(adminLogin.headers['set-cookie'][0], /Path=\/admin/);
+
+  const wrongPortal = await request(managerPortal).post('/yonetici/api/auth/login').send({
+    email: credentials.admin[0], password: credentials.admin[1]
+  });
+  assert.equal(wrongPortal.status, 403, wrongPortal.text);
+  assert.match(wrongPortal.body.message, /rolüyle eşleşmiyor/i);
+});
+
 test('işlem verilerini temizleme kullanıcıları ve ayarları korur', async () => {
   const { agent: admin } = await login(...credentials.admin);
   const wrong = await admin.post('/api/settings/clear-operations').send({ password: 'Wrong123!' });

@@ -84,7 +84,7 @@
       else if (page === 'settings') await AdminPages.showSettings(content);
       else if (page === 'profile') await ProfilePage.showProfile(content);
     } catch (error) {
-      if (error.status === 401) return window.location.replace('/login.html');
+      if (error.status === 401) return window.location.replace(Portal.url('/login.html'));
       content.innerHTML = UI.emptyState('Sayfa yüklenemedi', error.message);
     }
   }
@@ -170,12 +170,12 @@
     if (event.key === 'Escape' && !document.getElementById('decision-modal-backdrop').hidden) UI.closeDecisionModal();
     else if (event.key === 'Escape' && !document.getElementById('drawer').hidden) UI.closeDrawer();
   });
-  document.getElementById('logout-button').addEventListener('click', async () => { try { await Api.post('/api/auth/logout'); } finally { window.location.replace('/login.html'); } });
+  document.getElementById('logout-button').addEventListener('click', async () => { try { await Api.post('/api/auth/logout'); } finally { window.location.replace(Portal.url('/login.html')); } });
 
   Promise.all([Api.get('/api/auth/me'), Api.get('/api/setup/status')]).then(([user, setup]) => {
-    if (user.mustChangePassword) return window.location.replace('/change-password.html');
+    if (user.mustChangePassword) return window.location.replace(Portal.url('/change-password.html'));
     App.me = user;
     App.settings = setup.settings;
     renderOrganization(); renderAccount(); renderMenu(); navigate('overview');
-  }).catch(() => window.location.replace('/login.html'));
+  }).catch(() => window.location.replace(Portal.url('/login.html')));
 })();

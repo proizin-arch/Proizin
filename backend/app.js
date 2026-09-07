@@ -20,6 +20,9 @@ function createApp(options = {}) {
   credentialVault.configure(databasePath);
   const sessionStore = new SQLiteSessionStore(database);
   const frontendPath = options.apiOnly ? null : path.join(__dirname, '..', 'frontend');
+  const sessionName = options.sessionName || 'izinpro.sid';
+  const sessionPath = options.sessionPath || '/';
+  const apiPrefix = options.apiPrefix || '/api';
 
   app.disable('x-powered-by');
   app.use(helmet({
@@ -51,7 +54,7 @@ function createApp(options = {}) {
   app.use((req, _res, next) => Promise.resolve(ready).then(() => next(), next));
   if (options.trustProxy) app.set('trust proxy', 1);
   app.use(session({
-    name: 'izinpro.sid',
+    name: sessionName,
     secret: process.env.SESSION_SECRET || crypto.randomBytes(32).toString('hex'),
     store: sessionStore,
     resave: false,
@@ -61,11 +64,19 @@ function createApp(options = {}) {
       httpOnly: true,
       sameSite: 'lax',
       secure: options.secureCookies ?? process.env.CONTEXT === 'production',
+      path: sessionPath,
       maxAge: 1000 * 60 * 60 * 8
     }
   }));
 
-  app.use('/api', apiRoutes);
+  app.use((req, _res, next) => {
+    req.sessionCookieName = sessionName;
+    req.sessionCookiePath = sessionPath;
+    req.portalRole = options.portalRole || null;
+    next();
+  });
+
+  app.use(apiPrefix, apiRoutes);
   if (!options.apiOnly) {
     app.use('/icons', express.static(path.join(__dirname, '..', 'node_modules', 'lucide-static', 'icons'), { maxAge: '7d' }));
     app.use('/vendor/inter', express.static(path.join(__dirname, '..', 'node_modules', '@fontsource', 'inter'), { maxAge: '7d' }));
