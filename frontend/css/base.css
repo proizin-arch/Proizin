@@ -7,8 +7,8 @@
 }
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
-html { font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: var(--ink); background: var(--canvas); }
-body { margin: 0; min-height: 100vh; }
+html { max-width: 100%; overflow-x: hidden; font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: var(--ink); background: var(--canvas); }
+body { max-width: 100%; margin: 0; min-height: 100vh; }
 button, input, select, textarea { font: inherit; }
 button, a { -webkit-tap-highlight-color: transparent; }
 a { color: inherit; text-decoration: none; }
@@ -42,3 +42,11 @@ h1, h2, h3, p { margin-top: 0; }
 .spinner { width: 25px; height: 25px; border: 3px solid #dbe5f4; border-top-color: var(--primary); border-radius: 50%; animation: spin .7s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; animation-duration: .01ms !important; } }
+/* Persistent language control */
+.language-switcher { position: fixed; top: 22px; right: 24px; z-index: 120; display: inline-flex; align-items: center; gap: 3px; padding: 4px; border: 1px solid rgba(205,215,229,.95); border-radius: 11px; background: rgba(255,255,255,.92); box-shadow: 0 8px 24px rgba(25,42,70,.09); backdrop-filter: blur(10px); }
+.language-switcher button { min-width: 58px; height: 32px; padding: 0 9px; border: 0; border-radius: 7px; background: transparent; color: #697489; display: inline-flex; align-items: center; justify-content: center; gap: 6px; font: inherit; font-size: 10px; font-weight: 700; letter-spacing: .04em; cursor: pointer; transition: color .15s, background .15s, box-shadow .15s; }
+.language-flag { font-size: 15px; line-height: 1; letter-spacing: 0; }
+.language-switcher button:hover { color: var(--primary); background: #f1f5fb; }
+.language-switcher button.active { color: #fff; background: var(--primary); box-shadow: 0 3px 9px rgba(47,111,208,.24); }
+.language-switcher-inline { position: static; z-index: auto; flex: 0 0 auto; box-shadow: none; background: #f8fafc; }
+@media (max-width: 650px) { .auth-page .language-switcher { top: 14px; right: 14px; }.language-switcher button { min-width: 52px; padding: 0 7px; gap: 5px; } }

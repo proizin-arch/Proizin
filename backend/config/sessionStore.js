@@ -16,11 +16,11 @@ class SQLiteSessionStore extends session.Store {
     };
   }
 
-  get(sid, callback) {
+  async get(sid, callback) {
     try {
-      const row = this.statements.get.get(sid);
+      const row = await this.statements.get.get(sid);
       if (!row || row.expires <= Date.now()) {
-        if (row) this.statements.destroy.run(sid);
+        if (row) await this.statements.destroy.run(sid);
         return callback(null, null);
       }
       callback(null, JSON.parse(row.sess));
@@ -29,22 +29,22 @@ class SQLiteSessionStore extends session.Store {
     }
   }
 
-  set(sid, value, callback = () => {}) {
+  async set(sid, value, callback = () => {}) {
     try {
       const expires = value.cookie?.expires
         ? new Date(value.cookie.expires).getTime()
         : Date.now() + this.defaultTtl;
-      this.statements.set.run(sid, JSON.stringify(value), expires);
-      this.cleanup();
+      await this.statements.set.run(sid, JSON.stringify(value), expires);
+      await this.cleanup();
       callback(null);
     } catch (error) {
       callback(error);
     }
   }
 
-  destroy(sid, callback = () => {}) {
+  async destroy(sid, callback = () => {}) {
     try {
-      this.statements.destroy.run(sid);
+      await this.statements.destroy.run(sid);
       callback(null);
     } catch (error) {
       callback(error);
@@ -55,8 +55,8 @@ class SQLiteSessionStore extends session.Store {
     this.set(sid, value, callback);
   }
 
-  cleanup() {
-    this.statements.cleanup.run(Date.now());
+  async cleanup() {
+    await this.statements.cleanup.run(Date.now());
   }
 }
 

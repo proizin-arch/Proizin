@@ -1,181 +1,195 @@
 # İzinPro
 
-İzinPro, tek bilgisayarda çalışan web tabanlı bir personel izin talep ve yönetim sistemidir. Personel izin talebi oluşturabilir; yönetici yalnızca kendi departmanındaki personelin taleplerini onaylayabilir veya reddedebilir; sistem yöneticisi kullanıcıları, departmanları ve izin türlerini yönetebilir.
+İzinPro; personel izin taleplerini oluşturmak, takip etmek ve yönetmek için hazırlanmış bir web uygulamasıdır. Proje iki çalışma biçimini birlikte destekler: bilgisayarda Node.js + SQLite ile yerel kullanım ve Netlify Functions + PostgreSQL ile internet yayını.
 
-Uygulama küçük ve anlaşılır bir kapsamda tutulmuştur. Takvim, e-posta, grafik, PDF/Excel ve harici servis bağımlılıkları yoktur. Bütün uygulama verileri yerel SQLite dosyasında saklanır.
+Bu teslim paketindeki program kodu güncel sürümdür. ZIP'in içinde güvenli bir demo veritabanı bulunur. Bu nedenle ekranlar ve bütün özellikler güncel sistemle aynıdır; yalnızca örnek kullanıcılar ve örnek izin kayıtları geliştirici bilgisayarındaki çalışma verilerinden farklı olabilir.
 
-## Teknolojiler
+## En kolay çalıştırma yöntemi
 
+### Gerekli programlar
+
+- Windows 10 veya Windows 11
 - Node.js 24 LTS
-- Express 5
-- SQLite ve better-sqlite3
-- express-session ve SQLite tabanlı oturum deposu
-- bcrypt
-- Vanilla HTML, CSS ve JavaScript
-- Inter yazı tipi ve Lucide ikonları (yerel paketlerden sunulur)
+- Mor simgeli Microsoft Visual Studio 2022 veya daha yeni bir sürüm
+- Visual Studio içinde **Node.js development** bileşeni
+- Yalnızca ilk paket kurulumu sırasında internet bağlantısı
 
-## Kurulum
+Node.js indirme adresi: https://nodejs.org/
 
-Node.js 24 LTS kullanılması önerilir. Proje `.nvmrc` dosyası içerir.
+Visual Studio indirme adresi: https://visualstudio.microsoft.com/downloads/
 
-```bash
-nvm use
-npm install
-npm start
-```
+### İlk kurulum
 
-Ardından tarayıcıdan aşağıdaki adresi açın:
+1. ZIP dosyasını normal bir klasöre çıkartın. Programı ZIP'in içinden doğrudan çalıştırmayın.
+2. Kısa ve Türkçe karakter içermeyen bir klasör kullanmanız önerilir. Örnek: `C:\Projeler\IzinPro`
+3. Proje klasöründeki `KURULUM.bat` dosyasına çift tıklayın.
+4. Açılan pencere gerekli Node.js paketlerini kuracak ve sistem testlerini çalıştıracaktır.
+5. Ekranda kurulumun başarıyla tamamlandığı yazana kadar pencereyi kapatmayın.
+6. `IzinPro.sln` dosyasına çift tıklayarak projeyi Microsoft Visual Studio ile açın.
+7. Visual Studio üst menüsünde **IzinPro - 3 Hesap** çalışma hedefinin seçili olduğunu kontrol edin.
+8. `F5` tuşuna basın.
 
-```text
-http://localhost:3000
-```
+Sistem açıldığında admin, yönetici ve personel için üç ayrı tarayıcı adresi açılır:
 
-Uygulama ilk çalıştırmada `backend/database/izinpro.db` dosyasını, tabloları ve demo verilerini otomatik oluşturur. Sunucu kapatılıp açıldığında veriler korunur.
+- Admin: http://admin.localhost:3000
+- Yönetici: http://manager.localhost:3000
+- Personel: http://personel.localhost:3000
 
-`nvm` kullanmıyorsanız Node.js 24 kurduktan sonra doğrudan `npm install` ve `npm start` komutlarını çalıştırabilirsiniz.
+Üç adres aynı uygulamaya bağlıdır. Adresler farklı olduğu için üç hesaba aynı anda giriş yapılabilir ve hesapların oturumları birbirini kapatmaz.
 
-## Ortam Ayarları
+Kurulum bir kere tamamlandıktan sonra Visual Studio kullanmadan `BASLAT.bat` dosyasına çift tıklayarak da sistem başlatılabilir.
 
-Uygulama ayar olmadan lokal olarak çalışır. Sabit bir session secret kullanmak veya portu değiştirmek için `.env.example` dosyasını `.env` adıyla kopyalayın:
+## Demo giriş hesapları
 
-```env
-PORT=3000
-SESSION_SECRET=en-az-32-bayt-rastgele-ve-gizli-bir-deger
-DB_PATH=backend/database/izinpro.db
-NODE_ENV=development
-```
-
-## Demo Hesapları
-
-| Rol | E-posta | Şifre |
+| Yetki | Kullanıcı adresi | Şifre |
 | --- | --- | --- |
-| Sistem Yöneticisi | `admin@izinpro.local` | `Admin123!` |
-| Yönetici | `yonetici@izinpro.local` | `Yonetici123!` |
-| Personel | `personel@izinpro.local` | `Personel123!` |
-| İkinci Personel | `ayse@izinpro.local` | `Personel123!` |
+| Admin | `admin@izinpro.com` | `Admin123!` |
+| Yönetici | `ali.alaya@izinpro.com` | `Yonetici123!` |
+| Personel | `muhammet.ala@izinpro.com` | `Personel123!` |
 
-Şifreler yalnızca demo giriş bilgisidir. SQLite içerisinde bcrypt hash olarak tutulur.
+Yönetici ve personel aynı **Yazılım Geliştirme** departmanına bağlıdır. Demo veritabanında bekleyen, onaylanan ve reddedilen örnek izin talepleri bulunur.
 
-## Rol ve Yetki Sistemi
+Bu kullanıcı adresleri gerçek e-posta hesabı değildir. Yalnızca programa giriş yapmak için kullanılır.
 
-### Personel
+## Programda neler yapılabilir?
 
-- Kendi izin taleplerini görüntüler.
-- Yeni izin talebi oluşturur.
-- Yalnızca bekleyen talebini düzenler veya iptal eder.
-- Kendi iletişim bilgilerini ve şifresini değiştirir.
+### Personel hesabı
 
-### Yönetici
+- Yeni izin talebi oluşturabilir.
+- Kendi izin taleplerini ve durumlarını takip edebilir.
+- Bekleyen talebini düzenleyebilir.
+- Bekleyen talebini kalıcı olarak silebilir.
+- Kişisel bilgilerini ve şifresini değiştirebilir.
 
-- Yalnızca kendi departmanındaki personeli ve izin taleplerini görür.
-- Bekleyen talepleri açıklama ekleyerek onaylar veya reddeder.
-- Tamamlanan kararları onay geçmişinde görür.
-- Başka departmandaki kayıtlara API üzerinden de erişemez.
+### Yönetici hesabı
 
-### Sistem Yöneticisi
+- Personel hesabındaki bütün kendi izin işlemlerini yapabilir.
+- Yalnızca bağlı olduğu departmandaki çalışanları görebilir.
+- Kendi departmanındaki bekleyen izin taleplerini görebilir.
+- Talepleri onaylayabilir veya açıklama yazarak reddedebilir.
+- Verilen kararları onay geçmişinden takip edebilir.
+- Kendi izin talebini onaylayamaz.
 
-- Bütün izin taleplerini görür ve karara bağlayabilir.
-- Kullanıcı oluşturur, düzenler, pasifleştirir ve şifresini sıfırlar.
-- Kullanıcı rolünü ve departmanını değiştirir.
-- Departmanları ve izin türlerini yönetir.
+### Admin hesabı
 
-Login ekranında rol seçimi bulunmaz. Rol, başarılı girişten sonra veritabanından belirlenir. Menülerin gizlenmesine ek olarak bütün yetki kontrolleri backend üzerinde tekrar uygulanır.
+- Sistemdeki kullanıcıları oluşturabilir, düzenleyebilir, pasifleştirebilir ve uygun durumlarda silebilir.
+- Kullanıcıya admin, yönetici veya personel yetkisi verebilir.
+- Kullanıcı şifresini sıfırlayabilir ve geçici şifre oluşturabilir.
+- Departman oluşturabilir, düzenleyebilir ve departmana yönetici atayabilir.
+- Pozisyonları kendisi oluşturabilir ve kullanıcıları bu pozisyonlara atayabilir.
+- İzin türlerini oluşturabilir, düzenleyebilir veya pasifleştirebilir.
+- Bütün departmanların izin taleplerini filtreleyebilir.
+- Başka kullanıcıların bekleyen izin taleplerini onaylayabilir veya reddedebilir.
+- Gerekli izin kayıtlarını ve bağlı onay geçmişini kalıcı olarak silebilir.
+- Kurum adını ve sistem ayarlarını değiştirebilir.
+- Türkçe ve İngilizce arayüz arasında geçiş yapabilir.
+- İşlem verilerini temizleyebilir veya mevcut admin hesabını koruyarak sistemi sıfırlayabilir.
 
-## Temel İş Akışı
+Kullanılmış bir departman, pozisyon, izin türü veya kullanıcı yanlışlıkla silinemez. Önce bağlı kayıtların kaldırılması ya da ilgili kaydın pasifleştirilmesi gerekir.
 
-1. Personel giriş yapar ve izin talebi oluşturur.
-2. İş günü sayısı backend tarafından hesaplanır.
-3. Talep aynı departmanın yöneticisinin ekranına düşer.
-4. Yönetici talebi inceler, açıklama yazar ve onaylar veya reddeder.
-5. Karar izin talebine ve değiştirilemez onay geçmişine transaction içinde kaydedilir.
-6. Personel güncel sonucu kendi taleplerinde görür.
+## Departman ve pozisyonlar hazır mı geliyor?
 
-## Proje Yapısı
+Demo amacıyla örnek bir departman ve pozisyonlar bulunur. Gerçek kullanımda departmanları, pozisyonları, yöneticileri, personelleri ve izin türlerini admin hesabıyla siz oluşturabilirsiniz.
 
-```text
-frontend/
-  login.html
-  register.html
-  Dashboard.html
-  css/
-  js/
-  assets/
+Yeni kullanıcı oluşturulduğunda giriş adresi ad ve soyada göre otomatik hazırlanır. Aynı isim daha önce kullanılmışsa adresin sonuna sıra numarası eklenir. Yeni kullanıcı ilk girişinde geçici şifresini değiştirmek zorundadır.
 
-backend/
-  config/
-  controllers/
-  database/
-  middleware/
-  repositories/
-  routes/
-  services/
-  utils/
-  app.js
-  server.js
+## Veritabanı ve kayıtların saklanması
 
-tests/
-  api.test.js
-```
+SQL Server, MySQL veya başka bir veritabanı programı kurulmasına gerek yoktur. Uygulama SQLite kullanır.
 
-Backend akışı `Route → Controller → Service → Repository → SQLite` şeklindedir. SQL sorguları repository katmanında, iş kuralları service katmanında tutulur.
+Veritabanı dosyası:
 
-## Veritabanı
+`backend\database\izinpro.db`
 
-Temel tablolar:
+Oluşturulan kullanıcılar, şifre değişiklikleri, departmanlar, pozisyonlar ve izin işlemleri bu dosyaya kalıcı olarak kaydedilir. Program veya bilgisayar kapatılıp tekrar açıldığında kayıtlar kaybolmaz.
 
-- `roles`
-- `users`
-- `departments`
-- `leave_types`
-- `leave_requests`
-- `approval_history`
-- `sessions`
+Önemli: Güncel ZIP daha sonra aynı klasörün üzerine tekrar çıkartılırsa demo veritabanı mevcut veritabanının üzerine yazılabilir. Güncelleme yapmadan önce `backend\database\izinpro.db` dosyasını başka bir yere kopyalayarak yedekleyin.
 
-Foreign key kontrolleri açıktır. Geçmiş kaydı olan kullanıcılar fiziksel olarak silinmez; hesapları pasif yapılır. İzin iptali de kaydı silmek yerine `CANCELLED` durumuna geçirir.
+Netlify yayınında yerel SQLite dosyası kullanılmaz. Kullanıcılar, oturumlar, departmanlar, pozisyonlar ve izin kayıtları kalıcı PostgreSQL veritabanında tutulur. Veritabanı bağlantısı ve güvenlik anahtarları GitHub'a yazılmaz; Netlify ortam değişkenlerinde saklanır.
 
-## API Özeti
+## İnternet yayını
 
-```text
-POST   /api/auth/register
-POST   /api/auth/login
-POST   /api/auth/logout
-GET    /api/auth/me
-POST   /api/auth/change-password
+Canlı sürüm GitHub deposundan Netlify'a otomatik dağıtılır. `main` dalına gönderilen her onaylı güncellemede Netlify projeyi yeniden kurar. Yayın ayarları `netlify.toml`, statik paketleme `scripts/build-netlify.js`, API girişi ise `netlify/functions/api.js` dosyasındadır.
 
-GET    /api/users
-GET    /api/users/:id
-POST   /api/users
-PUT    /api/users/:id
-PATCH  /api/users/:id/status
-POST   /api/users/:id/reset-password
+Canlı ortamda zorunlu gizli değerler:
 
-GET    /api/departments
-POST   /api/departments
-PUT    /api/departments/:id
-PATCH  /api/departments/:id/status
+- `NETLIFY_DB_URL`: Kalıcı PostgreSQL bağlantı adresi
+- `SESSION_SECRET`: Oturum imzalama anahtarı
+- `TEMP_PASSWORD_KEY`: Geçici kullanıcı şifrelerini şifreleme anahtarı
 
-GET    /api/leave-types
-POST   /api/leave-types
-PUT    /api/leave-types/:id
+Bu değerler `.env` dosyasına veya GitHub deposuna eklenmemelidir.
 
-GET    /api/leave-requests
-GET    /api/leave-requests/:id
-POST   /api/leave-requests
-PUT    /api/leave-requests/:id
-PATCH  /api/leave-requests/:id/cancel
-POST   /api/leave-requests/:id/approve
-POST   /api/leave-requests/:id/reject
-GET    /api/leave-requests/history
+## Veri temizleme seçenekleri
 
-GET    /api/dashboard/summary
-```
+Admin hesabındaki **Sistem Ayarları → Veri Yönetimi** bölümünde iki ayrı işlem bulunur:
 
-Başarılı API yanıtları `{ "success": true, "data": ... }`, hatalar `{ "success": false, "message": "..." }` biçimindedir.
+- **İşlem verilerini temizle:** İzin taleplerini ve onay geçmişini siler. Kullanıcılar, departmanlar ve kurum ayarları korunur.
+- **Admin Hariç Sıfırla:** İşlemi yapan admin hesabını ve mevcut şifresini korur. Diğer kullanıcıları, departmanları, talepleri, onay geçmişini ve kurum ayarlarını temizler.
 
-## Testler
+Bu işlemler normal program açılışında kendiliğinden çalışmaz. Yalnızca admin onay verirse uygulanır.
+
+## Visual Studio Code ile çalıştırma
+
+Mor simgeli Microsoft Visual Studio zorunlu değildir. Proje mavi simgeli Visual Studio Code ile de çalıştırılabilir.
+
+1. ZIP'i klasöre çıkartın.
+2. Klasörü Visual Studio Code ile açın.
+3. VS Code içindeki Terminal menüsünden yeni terminal açın.
+4. İlk kullanımda aşağıdaki komutu çalıştırın:
 
 ```bash
-npm test
+npm ci
 ```
 
-Test paketi; authentication, rol yükseltme engeli, departman izolasyonu, izin oluşturma ve çakışma kontrolü, iş günü hesabı, onay/red geçmişi, şifre sıfırlama ve SQLite kalıcılığını kapsar.
+5. Ardından uygulamayı ve üç hesap adresini açmak için:
+
+```bash
+npm run start:vs
+```
+
+Geliştirme sırasında dosya değişikliklerinde backend'in otomatik yenilenmesi istenirse `npm run dev` kullanılabilir. Bu komutta tarayıcı adresleri elle açılır.
+
+## Programı kapatma
+
+Program çalışırken terminal veya komut penceresini kapatmayın. Sistemi durdurmak için bu pencerede `Ctrl + C` tuşlarına basın.
+
+## Sık karşılaşılan sorunlar
+
+### Node.js bulunamadı
+
+Node.js 24 LTS sürümünü kurun. Kurulumdan sonra açık Visual Studio, VS Code ve terminal pencerelerini tamamen kapatıp yeniden açın. Ardından `KURULUM.bat` dosyasını tekrar çalıştırın.
+
+### Visual Studio projeyi yüklemiyor
+
+Visual Studio Installer'ı açın. Kurulu Visual Studio sürümünde **Modify/Değiştir** seçeneğine girip **Node.js development** bileşenini kurun. Daha sonra `IzinPro.sln` dosyasını yeniden açın.
+
+### Port 3000 kullanımda
+
+Daha önce açılmış İzinPro terminalini kapatın. Gerekirse Görev Yöneticisi üzerinden eski `node.exe` işlemini sonlandırıp sistemi tekrar başlatın.
+
+### Tarayıcı otomatik açılmadı
+
+Terminalde `IzinPro running at http://localhost:3000` yazıyorsa sistem çalışıyor demektir. Admin, yönetici ve personel adreslerini yukarıdaki bağlantılardan elle açabilirsiniz.
+
+### Paket kurulumu tamamlanmadı
+
+İnternet bağlantısını kontrol edin ve `KURULUM.bat` dosyasını yeniden çalıştırın. Kurulum sırasında proje klasörünü veya terminal penceresini kapatmayın.
+
+## Proje yapısı
+
+```text
+IzinPro.sln             Microsoft Visual Studio çözümü
+IzinPro.esproj          Node.js proje tanımı
+KURULUM.bat             İlk paket kurulumu ve testler
+BASLAT.bat              Hızlı çalıştırma dosyası
+backend/                Node.js API, yerel SQLite ve canlı PostgreSQL desteği
+frontend/               Programın ekranları ve tasarımı
+netlify/                Netlify Functions API girişi
+netlify.toml            Netlify derleme, yönlendirme ve güvenlik ayarları
+tests/                  Otomatik sistem testleri
+package.json            Node.js komutları ve bağımlılıkları
+```
+
+Teknik akış `Route → Controller → Service → Repository → SQLite/PostgreSQL` şeklindedir. Backend Node.js/Express ile, kullanıcı arayüzü HTML, CSS ve JavaScript ile hazırlanmıştır.
+
+Daha ayrıntılı Microsoft Visual Studio açıklaması için `VISUAL-STUDIO-KURULUM.md` dosyasına bakabilirsiniz.

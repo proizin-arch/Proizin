@@ -13,6 +13,10 @@ function errorHandler(error, req, res, _next) {
     statusCode = 409;
     message = 'Bu bilgilerle eşleşen bir kayıt zaten bulunuyor veya kayıt başka veriler tarafından kullanılıyor.';
   }
+  if (['23503', '23505'].includes(error.code)) {
+    statusCode = 409;
+    message = 'Bu bilgilerle eşleşen bir kayıt zaten bulunuyor veya kayıt başka veriler tarafından kullanılıyor.';
+  }
   if (error instanceof SyntaxError && 'body' in error) {
     statusCode = 400;
     message = 'Gönderilen veri geçerli JSON biçiminde değil.';

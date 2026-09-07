@@ -18,38 +18,46 @@ function map(row) {
   };
 }
 
-function list(activeOnly = false) {
+async function list(activeOnly = false) {
   const where = activeOnly ? 'WHERE d.is_active = 1' : '';
-  return getDatabase().prepare(`${SELECT} ${where} GROUP BY d.id ORDER BY d.name`).all().map(map);
+  return (await getDatabase().prepare(`${SELECT} ${where} GROUP BY d.id ORDER BY d.name`).all()).map(map);
 }
 
-function findById(id) {
-  return map(getDatabase().prepare(`${SELECT} WHERE d.id = ? GROUP BY d.id`).get(id));
+async function findById(id) {
+  return map(await getDatabase().prepare(`${SELECT} WHERE d.id = ? GROUP BY d.id`).get(id));
 }
 
-function findByName(name) {
+async function findByName(name) {
   return getDatabase().prepare('SELECT * FROM departments WHERE name = ? COLLATE NOCASE').get(name);
 }
 
-function create({ name, managerId }) {
-  const result = getDatabase().prepare(
+async function create({ name, managerId }) {
+  const result = await getDatabase().prepare(
     'INSERT INTO departments (name, manager_id) VALUES (?, ?)'
   ).run(name, managerId);
   return findById(result.lastInsertRowid);
 }
 
-function update(id, { name, managerId }) {
-  getDatabase().prepare(`
+async function update(id, { name, managerId }) {
+  await getDatabase().prepare(`
     UPDATE departments SET name = ?, manager_id = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?
   `).run(name, managerId, id);
   return findById(id);
 }
 
-function setActive(id, active) {
-  getDatabase().prepare(`
+async function setActive(id, active) {
+  await getDatabase().prepare(`
     UPDATE departments SET is_active = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?
   `).run(active ? 1 : 0, id);
   return findById(id);
 }
 
-module.exports = { list, findById, findByName, create, update, setActive };
+async function remove(id) {
+  await getDatabase().prepare('DELETE FROM departments WHERE id = ?').run(id);
+}
+
+async function userCount(id) {
+  return Number((await getDatabase().prepare('SELECT COUNT(*) AS count FROM users WHERE department_id = ?').get(id)).count);
+}
+
+module.exports = { list, findById, findByName, create, update, setActive, remove, userCount };

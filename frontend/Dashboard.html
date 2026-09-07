@@ -11,7 +11,7 @@
 <body class="app-page">
   <div class="app-shell">
     <aside class="sidebar" id="sidebar">
-      <div class="sidebar-brand"><img src="/assets/logo-mark.svg" alt=""><span>İzinPro</span></div>
+      <div class="sidebar-brand"><img src="/assets/logo-mark.svg" alt=""><span class="sidebar-brand-copy"><strong>İzinPro</strong><small id="sidebar-organization" data-no-translate>—</small></span></div>
       <nav class="side-nav" id="side-nav" aria-label="Ana menü"></nav>
       <div class="sidebar-footer"><button id="logout-button" class="nav-item nav-logout" type="button"><img src="/icons/log-out.svg" alt=""><span>Çıkış Yap</span></button></div>
     </aside>
@@ -19,7 +19,7 @@
     <section class="workspace">
       <header class="topbar">
         <div class="topbar-title"><button class="mobile-menu" id="mobile-menu" type="button" aria-label="Menüyü aç"><img src="/icons/menu.svg" alt=""></button><div><span id="page-eyebrow">İZİNPRO</span><h1 id="page-title">Ana Sayfa</h1></div></div>
-        <div class="account-summary"><div class="account-text"><strong id="account-name">—</strong><span id="account-position">—</span></div><span class="role-badge" id="role-badge">—</span><div class="avatar" id="account-avatar">—</div></div>
+        <div class="topbar-actions"><div class="language-switcher language-switcher-inline" role="group" aria-label="Dil seçimi"><button type="button" data-language="tr" aria-label="Türkçe"><span class="language-flag" aria-hidden="true">🇹🇷</span><span>TR</span></button><button type="button" data-language="en" aria-label="English"><span class="language-flag" aria-hidden="true">🇺🇸</span><span>EN</span></button></div><div class="account-summary"><div class="account-text"><strong id="account-name" data-no-translate>—</strong><span id="account-position" data-no-translate>—</span></div><span class="role-badge" id="role-badge">—</span><div class="avatar" id="account-avatar">—</div></div></div>
       </header>
       <main class="main-content" id="main-content"><div class="page-loading"><span class="spinner"></span><p>Bilgiler yükleniyor…</p></div></main>
     </section>
@@ -27,9 +27,10 @@
 
   <div class="drawer-backdrop" id="drawer-backdrop" hidden></div>
   <aside class="drawer" id="drawer" aria-modal="true" role="dialog" aria-labelledby="drawer-title" hidden><header><div><span class="eyebrow" id="drawer-eyebrow">İZİNPRO</span><h2 id="drawer-title">Detay</h2></div><button class="icon-button" id="drawer-close" type="button" aria-label="Kapat"><img src="/icons/x.svg" alt=""></button></header><div class="drawer-body" id="drawer-body"></div></aside>
+  <div class="decision-modal-backdrop" id="decision-modal-backdrop" hidden><section class="decision-modal" id="decision-modal" role="dialog" aria-modal="true" aria-labelledby="decision-modal-title"><header><div><span class="eyebrow" id="decision-modal-eyebrow">KARAR İŞLEMİ</span><h2 id="decision-modal-title">İzin talebi</h2></div><button class="icon-button" id="decision-modal-close" type="button" aria-label="Kapat"><img src="/icons/x.svg" alt=""></button></header><div class="decision-modal-body" id="decision-modal-body"></div></section></div>
   <div class="modal-backdrop" id="modal-backdrop" hidden><section class="confirm-modal" role="dialog" aria-modal="true" aria-labelledby="confirm-title"><div class="confirm-icon"><img src="/icons/triangle-alert.svg" alt=""></div><h2 id="confirm-title">İşlemi onaylayın</h2><p id="confirm-message"></p><div class="modal-actions"><button class="button button-secondary" id="confirm-cancel" type="button">Vazgeç</button><button class="button button-danger" id="confirm-ok" type="button">Onayla</button></div></section></div>
   <div class="toast-region" id="toast-region" aria-live="polite"></div>
 
-  <script src="/js/api.js"></script><script src="/js/ui.js"></script><script src="/js/leave.js"></script><script src="/js/admin.js"></script><script src="/js/profile.js"></script><script src="/js/dashboard.js"></script>
+  <script src="/js/i18n.js"></script><script src="/js/api.js"></script><script src="/js/ui.js"></script><script src="/js/leave.js"></script><script src="/js/admin.js"></script><script src="/js/profile.js"></script><script src="/js/dashboard.js"></script>
 </body>
 </html>

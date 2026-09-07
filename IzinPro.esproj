@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.VisualStudio.JavaScript.Sdk/1.0.6578810">
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>8f0c9d7d-46b6-4c8a-aec1-7d0f5d5e7e41</ProjectGuid>
+    <ProjectName>IzinPro</ProjectName>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupCommand>npm run start:vs</StartupCommand>
+    <TestCommand>npm test</TestCommand>
+    <ShouldRunNpmInstall>true</ShouldRunNpmInstall>
+    <ShouldRunBuildScript>false</ShouldRunBuildScript>
+  </PropertyGroup>
+</Project>

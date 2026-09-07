@@ -1,24 +1,29 @@
 const departmentService = require('../services/departmentService');
 
-function list(req, res) {
+async function list(req, res) {
   const activeOnly = req.user.role !== 'ADMIN' || req.query.activeOnly === 'true';
-  res.json({ success: true, data: departmentService.list(activeOnly) });
+  res.json({ success: true, data: await departmentService.list(activeOnly) });
 }
 
-function publicList(_req, res) {
-  res.json({ success: true, data: departmentService.list(true) });
+async function publicList(_req, res) {
+  res.json({ success: true, data: await departmentService.list(true) });
 }
 
-function create(req, res) {
-  res.status(201).json({ success: true, data: departmentService.create(req.body) });
+async function create(req, res) {
+  res.status(201).json({ success: true, data: await departmentService.create(req.body) });
 }
 
-function update(req, res) {
-  res.json({ success: true, data: departmentService.update(req.params.id, req.body) });
+async function update(req, res) {
+  res.json({ success: true, data: await departmentService.update(req.params.id, req.body) });
 }
 
-function setStatus(req, res) {
-  res.json({ success: true, data: departmentService.setStatus(req.params.id, req.body.isActive) });
+async function setStatus(req, res) {
+  res.json({ success: true, data: await departmentService.setStatus(req.params.id, req.body.isActive) });
 }
 
-module.exports = { list, publicList, create, update, setStatus };
+async function remove(req, res) {
+  await departmentService.remove(req.params.id);
+  res.json({ success: true, data: null, message: 'Departman kalıcı olarak silindi.' });
+}
+
+module.exports = { list, publicList, create, update, setStatus, remove };

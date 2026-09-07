@@ -1,6 +1,6 @@
 const dashboardRepository = require('../repositories/dashboardRepository');
 
-function getSummary(user) {
+async function getSummary(user) {
   return dashboardRepository.summary(user);
 }
 

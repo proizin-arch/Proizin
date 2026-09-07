@@ -1,9 +1,9 @@
 const userRepository = require('../repositories/userRepository');
 const AppError = require('../utils/AppError');
 
-function requireAuth(req, _res, next) {
+async function requireAuth(req, _res, next) {
   if (!req.session?.userId) return next(new AppError('Oturum açmanız gerekiyor.', 401));
-  const user = userRepository.findById(req.session.userId);
+  const user = await userRepository.findById(req.session.userId);
   if (!user || !user.isActive) {
     return req.session.destroy(() => next(new AppError('Oturumunuz geçersiz. Lütfen tekrar giriş yapın.', 401)));
   }
@@ -20,4 +20,11 @@ function requireRole(...roles) {
   };
 }
 
-module.exports = { requireAuth, requireRole };
+function requirePasswordChanged(req, _res, next) {
+  if (req.user?.mustChangePassword) {
+    return next(new AppError('Devam etmek için geçici şifrenizi değiştirmeniz gerekiyor.', 403));
+  }
+  next();
+}
+
+module.exports = { requireAuth, requireRole, requirePasswordChanged };

@@ -1,44 +1,44 @@
 const { getDatabase } = require('../config/database');
 
-function count(sql, params = []) {
-  return getDatabase().prepare(sql).get(...params).count;
+async function count(sql, params = []) {
+  return Number((await getDatabase().prepare(sql).get(...params)).count);
 }
 
-function personnelSummary(user) {
+async function personnelSummary(user) {
   const params = [user.id];
   return {
-    totalRequests: count('SELECT COUNT(*) AS count FROM leave_requests WHERE user_id = ?', params),
-    pending: count("SELECT COUNT(*) AS count FROM leave_requests WHERE user_id = ? AND status = 'PENDING'", params),
-    approved: count("SELECT COUNT(*) AS count FROM leave_requests WHERE user_id = ? AND status = 'APPROVED'", params),
-    rejected: count("SELECT COUNT(*) AS count FROM leave_requests WHERE user_id = ? AND status = 'REJECTED'", params)
+    totalRequests: await count('SELECT COUNT(*) AS count FROM leave_requests WHERE user_id = ?', params),
+    pending: await count("SELECT COUNT(*) AS count FROM leave_requests WHERE user_id = ? AND status = 'PENDING'", params),
+    approved: await count("SELECT COUNT(*) AS count FROM leave_requests WHERE user_id = ? AND status = 'APPROVED'", params),
+    rejected: await count("SELECT COUNT(*) AS count FROM leave_requests WHERE user_id = ? AND status = 'REJECTED'", params)
   };
 }
 
-function managerSummary(user) {
+async function managerSummary(user) {
   const departmentId = user.department?.id || -1;
   const requestParams = [departmentId, user.id];
   return {
-    employees: count(
-      "SELECT COUNT(*) AS count FROM users u JOIN roles r ON r.id = u.role_id WHERE u.department_id = ? AND u.is_active = 1 AND r.name = 'PERSONNEL'",
-      [departmentId]
+    employees: await count(
+      'SELECT COUNT(*) AS count FROM users u WHERE u.department_id = ? AND u.is_active = 1 AND u.id != ?',
+      [departmentId, user.id]
     ),
-    pending: count("SELECT COUNT(*) AS count FROM leave_requests lr JOIN users u ON u.id = lr.user_id WHERE u.department_id = ? AND lr.user_id != ? AND lr.status = 'PENDING'", requestParams),
-    approved: count("SELECT COUNT(*) AS count FROM leave_requests lr JOIN users u ON u.id = lr.user_id WHERE u.department_id = ? AND lr.user_id != ? AND lr.status = 'APPROVED'", requestParams),
-    rejected: count("SELECT COUNT(*) AS count FROM leave_requests lr JOIN users u ON u.id = lr.user_id WHERE u.department_id = ? AND lr.user_id != ? AND lr.status = 'REJECTED'", requestParams)
+    pending: await count("SELECT COUNT(*) AS count FROM leave_requests lr JOIN users u ON u.id = lr.user_id WHERE u.department_id = ? AND lr.user_id != ? AND lr.status = 'PENDING'", requestParams),
+    approved: await count("SELECT COUNT(*) AS count FROM leave_requests lr JOIN users u ON u.id = lr.user_id WHERE u.department_id = ? AND lr.user_id != ? AND lr.status = 'APPROVED'", requestParams),
+    rejected: await count("SELECT COUNT(*) AS count FROM leave_requests lr JOIN users u ON u.id = lr.user_id WHERE u.department_id = ? AND lr.user_id != ? AND lr.status = 'REJECTED'", requestParams)
   };
 }
 
-function adminSummary() {
+async function adminSummary() {
   return {
-    users: count('SELECT COUNT(*) AS count FROM users WHERE is_active = 1'),
-    departments: count('SELECT COUNT(*) AS count FROM departments WHERE is_active = 1'),
-    pending: count("SELECT COUNT(*) AS count FROM leave_requests WHERE status = 'PENDING'"),
-    approved: count("SELECT COUNT(*) AS count FROM leave_requests WHERE status = 'APPROVED'"),
-    rejected: count("SELECT COUNT(*) AS count FROM leave_requests WHERE status = 'REJECTED'")
+    users: await count('SELECT COUNT(*) AS count FROM users WHERE is_active = 1'),
+    departments: await count('SELECT COUNT(*) AS count FROM departments WHERE is_active = 1'),
+    pending: await count("SELECT COUNT(*) AS count FROM leave_requests WHERE status = 'PENDING'"),
+    approved: await count("SELECT COUNT(*) AS count FROM leave_requests WHERE status = 'APPROVED'"),
+    rejected: await count("SELECT COUNT(*) AS count FROM leave_requests WHERE status = 'REJECTED'")
   };
 }
 
-function summary(user) {
+async function summary(user) {
   if (user.role === 'ADMIN') return adminSummary();
   if (user.role === 'MANAGER') return managerSummary(user);
   return personnelSummary(user);

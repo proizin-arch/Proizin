@@ -4,7 +4,8 @@ const { closeDatabase } = require('./config/database');
 
 const port = Number(process.env.PORT) || 3000;
 const app = createApp();
-const server = app.listen(port, '127.0.0.1', () => {
+const host = process.env.HOST || '127.0.0.1';
+const server = app.listen(port, host, () => {
   console.log(`İzinPro running at http://localhost:${port}`);
 });
 

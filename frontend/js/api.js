@@ -6,7 +6,8 @@
     const contentType = response.headers.get('content-type') || '';
     const payload = contentType.includes('application/json') ? await response.json() : null;
     if (!response.ok) {
-      const error = new Error(payload?.message || 'İşlem tamamlanamadı.');
+      const message = payload?.message || 'İşlem tamamlanamadı.';
+      const error = new Error(window.I18n?.t(message) || message);
       error.status = response.status;
       error.details = payload?.details;
       throw error;
@@ -18,6 +19,7 @@
     get: (path) => request(path),
     post: (path, body = {}) => request(path, { method: 'POST', body: JSON.stringify(body) }),
     put: (path, body = {}) => request(path, { method: 'PUT', body: JSON.stringify(body) }),
-    patch: (path, body = {}) => request(path, { method: 'PATCH', body: JSON.stringify(body) })
+    patch: (path, body = {}) => request(path, { method: 'PATCH', body: JSON.stringify(body) }),
+    delete: (path, body = {}) => request(path, { method: 'DELETE', body: JSON.stringify(body) })
   };
 })();

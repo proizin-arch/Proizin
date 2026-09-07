@@ -3,7 +3,7 @@
     PENDING: ['Bekliyor', 'pending'], APPROVED: ['Onaylandı', 'approved'],
     REJECTED: ['Reddedildi', 'rejected'], CANCELLED: ['İptal edildi', 'cancelled']
   };
-  const roleMap = { PERSONNEL: 'PERSONEL', MANAGER: 'YÖNETİCİ', ADMIN: 'SİSTEM YÖNETİCİSİ' };
+  const roleMap = { PERSONNEL: 'PERSONEL', MANAGER: 'YÖNETİCİ', ADMIN: 'ADMIN' };
 
   function escapeHtml(value) {
     return String(value ?? '').replace(/[&<>'"]/g, (char) => ({
@@ -22,13 +22,13 @@
   function formatDate(value) {
     if (!value) return '—';
     const [year, month, day] = String(value).slice(0, 10).split('-').map(Number);
-    return new Intl.DateTimeFormat('tr-TR').format(new Date(Date.UTC(year, month - 1, day)));
+    return new Intl.DateTimeFormat(window.I18n?.locale() || 'tr-TR').format(new Date(Date.UTC(year, month - 1, day)));
   }
 
   function formatDateTime(value) {
     if (!value) return '—';
     const normalized = String(value).includes('T') ? value : `${String(value).replace(' ', 'T')}Z`;
-    return new Intl.DateTimeFormat('tr-TR', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(normalized));
+    return new Intl.DateTimeFormat(window.I18n?.locale() || 'tr-TR', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(normalized));
   }
 
   function statusBadge(status) {
@@ -38,7 +38,7 @@
 
   function personCell(user) {
     const name = user.employeeName || user.fullName;
-    return `<div class="person-cell"><span class="mini-avatar">${escapeHtml(initials(name))}</span><span><strong>${escapeHtml(name)}</strong><small>${escapeHtml(user.position || user.email || '')}</small></span></div>`;
+    return `<div class="person-cell" data-no-translate><span class="mini-avatar">${escapeHtml(initials(name))}</span><span><strong>${escapeHtml(name)}</strong><small>${escapeHtml(user.position || user.email || '')}</small></span></div>`;
   }
 
   function emptyState(title, message, actionLabel, action) {
@@ -94,6 +94,28 @@
     window.setTimeout(() => { drawer.hidden = true; backdrop.hidden = true; }, 220);
   }
 
+  function openDecisionModal({ title, eyebrow = 'KARAR İŞLEMİ', tone = 'approve', content, onOpen }) {
+    const backdrop = document.getElementById('decision-modal-backdrop');
+    const modal = document.getElementById('decision-modal');
+    document.getElementById('decision-modal-title').textContent = title;
+    document.getElementById('decision-modal-eyebrow').textContent = eyebrow;
+    document.getElementById('decision-modal-body').innerHTML = content;
+    modal.classList.toggle('decision-reject-tone', tone === 'reject');
+    backdrop.hidden = false;
+    requestAnimationFrame(() => backdrop.classList.add('open'));
+    document.body.classList.add('modal-open');
+    if (onOpen) onOpen(document.getElementById('decision-modal-body'));
+    const firstControl = document.getElementById('decision-modal-body').querySelector('textarea, input, select, button');
+    if (firstControl) firstControl.focus();
+  }
+
+  function closeDecisionModal() {
+    const backdrop = document.getElementById('decision-modal-backdrop');
+    backdrop.classList.remove('open');
+    document.body.classList.remove('modal-open');
+    window.setTimeout(() => { backdrop.hidden = true; }, 180);
+  }
+
   function confirmAction(message, confirmLabel = 'Onayla') {
     return new Promise((resolve) => {
       const backdrop = document.getElementById('modal-backdrop');
@@ -115,5 +137,5 @@
     });
   }
 
-  window.UI = { escapeHtml, icon, initials, formatDate, formatDateTime, statusBadge, roleMap, personCell, emptyState, toast, setButtonLoading, openDrawer, closeDrawer, confirmAction };
+  window.UI = { escapeHtml, icon, initials, formatDate, formatDateTime, statusBadge, roleMap, personCell, emptyState, toast, setButtonLoading, openDrawer, closeDrawer, openDecisionModal, closeDecisionModal, confirmAction };
 })();

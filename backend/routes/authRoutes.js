@@ -5,7 +5,6 @@ const { requireAuth } = require('../middleware/auth');
 
 const router = express.Router();
 
-router.post('/register', asyncHandler(controller.register));
 router.post('/login', asyncHandler(controller.login));
 router.post('/logout', requireAuth, controller.logout);
 router.get('/me', requireAuth, controller.me);

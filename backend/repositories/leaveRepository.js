@@ -6,12 +6,13 @@ const BASE_SELECT = `
          lr.working_days, lr.employee_comment, lr.manager_comment, lr.status,
          lr.approved_by, lr.decision_at, lr.created_at, lr.updated_at,
          u.first_name || ' ' || u.last_name AS employee_name,
-         u.position, u.department_id, d.name AS department_name,
+         COALESCE(p.name, u.position) AS position, u.department_id, d.name AS department_name,
          lt.name AS leave_type_name, lt.code AS leave_type_code, lt.color AS leave_type_color,
          a.first_name || ' ' || a.last_name AS approver_name
   FROM leave_requests lr
   JOIN users u ON u.id = lr.user_id
   LEFT JOIN departments d ON d.id = u.department_id
+  LEFT JOIN positions p ON p.id = u.position_id
   JOIN leave_types lt ON lt.id = lr.leave_type_id
   LEFT JOIN users a ON a.id = lr.approved_by
 `;
@@ -43,16 +44,21 @@ function map(row) {
   };
 }
 
-function list({ requester, status, leaveTypeId, startDate, endDate, search } = {}) {
+async function list({ requester, scope, departmentId, status, leaveTypeId, startDate, endDate, search } = {}) {
   const conditions = [];
   const params = [];
 
-  if (requester.role === 'PERSONNEL') {
+  if (scope === 'mine' || requester.role === 'PERSONNEL') {
     conditions.push('lr.user_id = ?');
     params.push(requester.id);
-  } else if (requester.role === 'MANAGER') {
+  } else if (scope === 'team' || requester.role === 'MANAGER') {
     conditions.push('u.department_id = ?', 'lr.user_id != ?');
     params.push(requester.department?.id || -1, requester.id);
+  }
+
+  if (departmentId) {
+    conditions.push('u.department_id = ?');
+    params.push(departmentId);
   }
 
   if (status) {
@@ -77,22 +83,22 @@ function list({ requester, status, leaveTypeId, startDate, endDate, search } = {
   }
 
   const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
-  return getDatabase().prepare(`${BASE_SELECT} ${where} ORDER BY lr.created_at DESC, lr.id DESC`)
-    .all(...params).map(map);
+  return (await getDatabase().prepare(`${BASE_SELECT} ${where} ORDER BY lr.created_at DESC, lr.id DESC`)
+    .all(...params)).map(map);
 }
 
-function findById(id) {
-  return map(getDatabase().prepare(`${BASE_SELECT} WHERE lr.id = ?`).get(id));
+async function findById(id) {
+  return map(await getDatabase().prepare(`${BASE_SELECT} WHERE lr.id = ?`).get(id));
 }
 
-function hasOverlap(userId, startDate, endDate, excludeId = null) {
+async function hasOverlap(userId, startDate, endDate, excludeId = null) {
   const params = [userId, endDate, startDate];
   let exclude = '';
   if (excludeId) {
     exclude = 'AND id != ?';
     params.push(excludeId);
   }
-  const row = getDatabase().prepare(`
+  const row = await getDatabase().prepare(`
     SELECT 1 FROM leave_requests
     WHERE user_id = ? AND status IN ('PENDING', 'APPROVED')
       AND start_date <= ? AND end_date >= ? ${exclude}
@@ -101,8 +107,8 @@ function hasOverlap(userId, startDate, endDate, excludeId = null) {
   return Boolean(row);
 }
 
-function create(data) {
-  const result = getDatabase().prepare(`
+async function create(data) {
+  const result = await getDatabase().prepare(`
     INSERT INTO leave_requests
       (user_id, leave_type_id, start_date, end_date, working_days, employee_comment)
     VALUES (?, ?, ?, ?, ?, ?)
@@ -113,8 +119,8 @@ function create(data) {
   return findById(result.lastInsertRowid);
 }
 
-function update(id, data) {
-  getDatabase().prepare(`
+async function update(id, data) {
+  await getDatabase().prepare(`
     UPDATE leave_requests SET leave_type_id = ?, start_date = ?, end_date = ?,
       working_days = ?, employee_comment = ?, updated_at = CURRENT_TIMESTAMP
     WHERE id = ? AND status = 'PENDING'
@@ -122,47 +128,66 @@ function update(id, data) {
   return findById(id);
 }
 
-function cancel(id) {
-  getDatabase().prepare(`
+async function cancel(id) {
+  await getDatabase().prepare(`
     UPDATE leave_requests SET status = 'CANCELLED', updated_at = CURRENT_TIMESTAMP
     WHERE id = ? AND status = 'PENDING'
   `).run(id);
   return findById(id);
 }
 
-function decide(id, managerId, decision, comment) {
+async function decide(id, managerId, decision, comment) {
   const db = getDatabase();
-  const transaction = db.transaction(() => {
-    const current = db.prepare('SELECT status FROM leave_requests WHERE id = ?').get(id);
+  if (!db.isPostgres) {
+    db.transaction(() => {
+      const current = db.prepare('SELECT status FROM leave_requests WHERE id = ?').get(id);
+      if (!current) throw new AppError('İzin talebi bulunamadı.', 404);
+      if (current.status !== 'PENDING') {
+        throw new AppError('Yalnızca bekleyen talepler için karar verilebilir.', 409);
+      }
+      db.prepare(`
+        UPDATE leave_requests SET status = ?, manager_comment = ?, approved_by = ?,
+          decision_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
+        WHERE id = ? AND status = 'PENDING'
+      `).run(decision, comment, managerId, id);
+      db.prepare(`
+        INSERT INTO approval_history (leave_request_id, manager_id, decision, comment)
+        VALUES (?, ?, ?, ?)
+      `).run(id, managerId, decision, comment);
+    })();
+    return findById(id);
+  }
+  const transaction = db.transaction(async () => {
+    const current = await db.prepare('SELECT status FROM leave_requests WHERE id = ?').get(id);
     if (!current) throw new AppError('İzin talebi bulunamadı.', 404);
     if (current.status !== 'PENDING') {
       throw new AppError('Yalnızca bekleyen talepler için karar verilebilir.', 409);
     }
-    db.prepare(`
+    await db.prepare(`
       UPDATE leave_requests SET status = ?, manager_comment = ?, approved_by = ?,
         decision_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
       WHERE id = ? AND status = 'PENDING'
     `).run(decision, comment, managerId, id);
-    db.prepare(`
+    await db.prepare(`
       INSERT INTO approval_history (leave_request_id, manager_id, decision, comment)
       VALUES (?, ?, ?, ?)
     `).run(id, managerId, decision, comment);
   });
-  transaction();
+  await transaction();
   return findById(id);
 }
 
-function history({ requester } = {}) {
+async function history({ requester, scope = 'management' } = {}) {
   const conditions = ["ah.decision IN ('APPROVED', 'REJECTED')"];
   const params = [];
-  if (requester.role === 'MANAGER') {
-    conditions.push('u.department_id = ?');
-    params.push(requester.department?.id || -1);
-  } else if (requester.role === 'PERSONNEL') {
+  if (scope === 'mine' || requester.role === 'PERSONNEL') {
     conditions.push('lr.user_id = ?');
     params.push(requester.id);
+  } else if (scope === 'team' || requester.role === 'MANAGER') {
+    conditions.push('u.department_id = ?');
+    params.push(requester.department?.id || -1);
   }
-  return getDatabase().prepare(`
+  return (await getDatabase().prepare(`
     SELECT ah.id, ah.decision, ah.comment, ah.created_at,
            lr.id AS leave_request_id, u.first_name || ' ' || u.last_name AS employee_name,
            lt.name AS leave_type_name, m.first_name || ' ' || m.last_name AS manager_name
@@ -173,7 +198,7 @@ function history({ requester } = {}) {
     JOIN users m ON m.id = ah.manager_id
     WHERE ${conditions.join(' AND ')}
     ORDER BY ah.created_at DESC, ah.id DESC
-  `).all(...params).map((row) => ({
+  `).all(...params)).map((row) => ({
     id: row.id,
     leaveRequestId: row.leave_request_id,
     employeeName: row.employee_name,
@@ -185,4 +210,19 @@ function history({ requester } = {}) {
   }));
 }
 
-module.exports = { list, findById, hasOverlap, create, update, cancel, decide, history };
+async function remove(id) {
+  const db = getDatabase();
+  if (!db.isPostgres) {
+    db.transaction(() => {
+      db.prepare('DELETE FROM approval_history WHERE leave_request_id = ?').run(id);
+      db.prepare('DELETE FROM leave_requests WHERE id = ?').run(id);
+    })();
+    return;
+  }
+  await db.transaction(async () => {
+    await db.prepare('DELETE FROM approval_history WHERE leave_request_id = ?').run(id);
+    await db.prepare('DELETE FROM leave_requests WHERE id = ?').run(id);
+  })();
+}
+
+module.exports = { list, findById, hasOverlap, create, update, cancel, decide, history, remove };

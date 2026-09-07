@@ -1,8 +1,15 @@
 node_modules/
+.netlify/
+.netlify-dist/
+.vs/
+obj/
+*.esproj.user
 .env
 backend/database/*.db
 backend/database/*.db-shm
 backend/database/*.db-wal
+backend/database/*.key
 coverage/
 .DS_Store
 npm-debug.log*
+*.zip

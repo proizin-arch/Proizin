@@ -6,13 +6,6 @@ function regenerateSession(req) {
   });
 }
 
-async function register(req, res) {
-  const user = await authService.register(req.body);
-  await regenerateSession(req);
-  req.session.userId = user.id;
-  res.status(201).json({ success: true, data: user });
-}
-
 async function login(req, res) {
   const user = await authService.login(req.body.email, req.body.password);
   await regenerateSession(req);
@@ -38,4 +31,4 @@ async function changePassword(req, res) {
   res.json({ success: true, data: null, message: 'Şifreniz güncellendi.' });
 }
 
-module.exports = { register, login, logout, me, changePassword };
+module.exports = { login, logout, me, changePassword };

@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="İzinPro ilk kurulum">
+  <title>İlk Kurulum | İzinPro</title>
+  <link rel="stylesheet" href="/vendor/inter/400.css"><link rel="stylesheet" href="/vendor/inter/500.css"><link rel="stylesheet" href="/vendor/inter/600.css"><link rel="stylesheet" href="/vendor/inter/700.css">
+  <link rel="stylesheet" href="/css/base.css"><link rel="stylesheet" href="/css/login.css">
+</head>
+<body class="auth-page setup-page">
+  <div class="language-switcher" role="group" aria-label="Dil seçimi"><button type="button" data-language="tr" aria-label="Türkçe"><span class="language-flag" aria-hidden="true">🇹🇷</span><span>TR</span></button><button type="button" data-language="en" aria-label="English"><span class="language-flag" aria-hidden="true">🇺🇸</span><span>EN</span></button></div>
+  <main class="setup-shell">
+    <header class="setup-header brand"><img src="/assets/logo-mark.svg" alt=""><span>İzinPro</span></header>
+    <section class="setup-card">
+      <div class="setup-intro">
+        <span class="setup-step">İLK KURULUM</span>
+        <h1>Kurumunuzu ve ana yöneticiyi oluşturun</h1>
+        <p>Bu adım yalnızca bir kez gösterilir. Daha sonra departmanları ve kullanıcıları yönetim panelinden ekleyebilirsiniz.</p>
+      </div>
+      <form id="setup-form" class="form-grid" novalidate>
+        <div class="field field-wide"><label for="organizationName">Kurum adı</label><input id="organizationName" name="organizationName" maxlength="100" placeholder="Örn. İzinPro Teknoloji" required></div>
+        <div class="field"><label for="firstName">Admin adı</label><input id="firstName" name="firstName" maxlength="60" required></div>
+        <div class="field"><label for="lastName">Admin soyadı</label><input id="lastName" name="lastName" maxlength="60" required></div>
+        <div class="field field-wide"><label for="generatedAddress">Oluşturulacak admin adresi</label><div class="generated-address"><img src="/icons/at-sign.svg" alt=""><output id="generatedAddress">admin@izinpro.com</output></div><small>Bu adres yalnızca İzinPro'ya giriş yapmak için kullanılır; e-posta göndermez.</small></div>
+        <div class="field"><label for="position">Pozisyon</label><input id="position" name="position" maxlength="100" value="Admin" data-i18n-value="Administrator" required></div>
+        <div class="field"><label for="hireDate">İşe giriş tarihi</label><input id="hireDate" name="hireDate" type="date" required></div>
+        <div class="field"><label for="password">Admin şifresi</label><input id="password" name="password" type="password" autocomplete="new-password" required><small>En az 8 karakter; büyük/küçük harf, rakam ve özel karakter.</small></div>
+        <div class="field"><label for="passwordConfirm">Şifre tekrar</label><input id="passwordConfirm" name="passwordConfirm" type="password" autocomplete="new-password" required></div>
+        <p class="form-error field-wide" id="form-error" role="alert" hidden></p>
+        <div class="form-actions field-wide"><button class="button button-primary" type="submit"><span>Kurulumu Tamamla</span><img src="/icons/arrow-right.svg" alt=""></button></div>
+      </form>
+    </section>
+  </main>
+  <script src="/js/i18n.js"></script><script src="/js/api.js"></script><script src="/js/setup.js"></script>
+</body>
+</html>

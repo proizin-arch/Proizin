@@ -13,6 +13,7 @@
   <link rel="stylesheet" href="/css/login.css">
 </head>
 <body class="auth-page">
+  <div class="language-switcher" role="group" aria-label="Dil seçimi"><button type="button" data-language="tr" aria-label="Türkçe"><span class="language-flag" aria-hidden="true">🇹🇷</span><span>TR</span></button><button type="button" data-language="en" aria-label="English"><span class="language-flag" aria-hidden="true">🇺🇸</span><span>EN</span></button></div>
   <main class="auth-shell">
     <section class="auth-visual" aria-label="İzinPro tanıtımı">
       <a class="brand" href="/" aria-label="İzinPro ana sayfa">
@@ -35,21 +36,22 @@
         </div>
         <div class="approval-pill"><img src="/icons/circle-check.svg" alt=""><span><b>Talep onaylandı</b><small>2 iş günü</small></span></div>
       </div>
-      <div class="visual-foot"><img src="/icons/shield-check.svg" alt=""> Verileriniz yalnızca bu bilgisayarda saklanır.</div>
+      <div class="visual-foot"><img src="/icons/shield-check.svg" alt=""> Şifreler güvenli biçimde saklanır; erişim yetkilere göre sınırlandırılır.</div>
     </section>
 
     <section class="auth-panel">
       <div class="auth-card">
         <div class="mobile-brand brand"><img src="/assets/logo-mark.svg" alt=""><span>İzinPro</span></div>
         <div class="auth-heading">
+          <span class="organization-chip" id="login-organization" data-no-translate hidden></span>
           <span class="eyebrow">HOŞ GELDİNİZ</span>
           <h2>Hesabınıza giriş yapın</h2>
-          <p>Devam etmek için e-posta adresinizi ve şifrenizi girin.</p>
+          <p>Devam etmek için kurum kullanıcı adresinizi ve şifrenizi girin.</p>
         </div>
         <form id="login-form" novalidate>
           <div class="field">
-            <label for="email">E-posta</label>
-            <div class="input-wrap"><img src="/icons/mail.svg" alt=""><input id="email" name="email" type="email" autocomplete="email" placeholder="ornek@izinpro.local" required></div>
+            <label for="email">Kullanıcı adresi</label>
+            <div class="input-wrap"><img src="/icons/mail.svg" alt=""><input id="email" name="email" type="email" autocomplete="username" placeholder="ad.soyad@izinpro.com" required></div>
           </div>
           <div class="field">
             <label for="password">Şifre</label>
@@ -59,12 +61,11 @@
           <p class="form-error" id="form-error" role="alert" hidden></p>
           <button class="button button-primary button-block" type="submit"><span>Giriş Yap</span><img src="/icons/arrow-right.svg" alt=""></button>
         </form>
-        <div class="auth-divider"><span>veya</span></div>
-        <a class="button button-secondary button-block" href="/register.html"><img src="/icons/user-plus.svg" alt=""><span>Yeni hesap oluştur</span></a>
-        <p class="auth-note">Rolünüz giriş sonrasında sistem tarafından otomatik belirlenir.</p>
+        <p class="auth-note">Yeni hesaplar yalnızca admin tarafından oluşturulur.</p>
       </div>
     </section>
   </main>
+  <script src="/js/i18n.js"></script>
   <script src="/js/api.js"></script>
   <script src="/js/login.js"></script>
 </body>
