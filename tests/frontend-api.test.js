@@ -54,3 +54,11 @@ test('portal API istekleri kendi yolunu kullanır ve değişikliği diğer sekme
   channel.listener({ data: { path: '/api/leave-requests', method: 'POST' } });
   assert.deepEqual(incoming, { path: '/api/leave-requests', method: 'POST' });
 });
+
+test('panelde elle veri yenileme düğmesi bulunur', () => {
+  const html = fs.readFileSync(path.join(__dirname, '..', 'frontend', 'Dashboard.html'), 'utf8');
+  const script = fs.readFileSync(path.join(__dirname, '..', 'frontend', 'js', 'dashboard.js'), 'utf8');
+  assert.match(html, /id="refresh-data-button"/);
+  assert.match(html, /refresh-cw\.svg/);
+  assert.match(script, /refreshCurrentPage\(\{ force: true \}\)/);
+});

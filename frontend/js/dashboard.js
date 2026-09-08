@@ -101,13 +101,13 @@
     return drawerOpen || decisionOpen || confirmationOpen || editing;
   }
 
-  async function refreshCurrentPage() {
+  async function refreshCurrentPage(options = {}) {
     if (!App.me || document.hidden || autoRefreshRunning || hasOpenEditor()) {
       refreshPending = true;
       return;
     }
     const now = Date.now();
-    if (now - lastAutoRefresh < 400) return;
+    if (!options.force && now - lastAutoRefresh < 400) return;
     autoRefreshRunning = true;
     refreshPending = false;
     lastAutoRefresh = now;
@@ -127,6 +127,19 @@
     if (!document.hidden) refreshCurrentPage();
   });
   window.addEventListener('focus', () => refreshCurrentPage());
+
+  const refreshButton = document.getElementById('refresh-data-button');
+  refreshButton.addEventListener('click', async () => {
+    refreshButton.disabled = true;
+    refreshButton.classList.add('is-refreshing');
+    try {
+      await refreshCurrentPage({ force: true });
+      UI.toast('Veriler yenilendi.');
+    } finally {
+      refreshButton.disabled = false;
+      refreshButton.classList.remove('is-refreshing');
+    }
+  });
 
   function statCard(label, value, icon, tone = '', page = '') {
     const tag = page ? 'button' : 'article';
