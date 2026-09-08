@@ -38,6 +38,9 @@
   };
   const pageNames = { overview: 'Ana Sayfa', 'my-requests': 'İzin Taleplerim', 'team-requests': 'Departman Talepleri', 'all-requests': 'Tüm İzin Talepleri', employees: 'Çalışanlar', users: 'Kullanıcılar', departments: 'Departmanlar', positions: 'Pozisyonlar', 'leave-types': 'İzin Türleri', settings: 'Sistem Ayarları', profile: 'Kişisel Bilgiler' };
   const content = document.getElementById('main-content');
+  let autoRefreshRunning = false;
+  let refreshPending = false;
+  let lastAutoRefresh = 0;
 
   window.App = {
     me: null,
@@ -63,14 +66,14 @@
     document.getElementById('side-nav').innerHTML = menus[App.me.role].map((group) => `<section class="nav-section"><span class="nav-label">${UI.escapeHtml(group.section)}</span>${group.items.map((item) => `<button class="nav-item" type="button" data-page="${item.id}">${UI.icon(item.icon)}<span>${UI.escapeHtml(item.label)}</span></button>`).join('')}</section>`).join('');
   }
 
-  async function navigate(page) {
+  async function navigate(page, options = {}) {
     if (!menus[App.me.role].some((group) => group.items.some((item) => item.id === page))) page = 'overview';
     App.currentPage = page;
     document.querySelectorAll('[data-page]').forEach((button) => button.classList.toggle('active', button.dataset.page === page));
     document.getElementById('page-title').textContent = pageNames[page];
     document.getElementById('page-eyebrow').textContent = UI.roleMap[App.me.role];
     closeMobileMenu();
-    content.innerHTML = '<div class="page-loading"><span class="spinner"></span><p>Bilgiler yükleniyor…</p></div>';
+    if (!options.silent) content.innerHTML = '<div class="page-loading"><span class="spinner"></span><p>Bilgiler yükleniyor…</p></div>';
     try {
       if (page === 'overview') await showOverview();
       else if (page === 'my-requests') await LeavePages.showRequests(content, 'mine');
@@ -88,6 +91,42 @@
       content.innerHTML = UI.emptyState('Sayfa yüklenemedi', error.message);
     }
   }
+
+  function hasOpenEditor() {
+    const drawerOpen = !document.getElementById('drawer').hidden;
+    const decisionOpen = !document.getElementById('decision-modal-backdrop').hidden;
+    const confirmationOpen = !document.getElementById('modal-backdrop').hidden;
+    const active = document.activeElement;
+    const editing = active?.matches?.('input, textarea, select, [contenteditable="true"]');
+    return drawerOpen || decisionOpen || confirmationOpen || editing;
+  }
+
+  async function refreshCurrentPage() {
+    if (!App.me || document.hidden || autoRefreshRunning || hasOpenEditor()) {
+      refreshPending = true;
+      return;
+    }
+    const now = Date.now();
+    if (now - lastAutoRefresh < 400) return;
+    autoRefreshRunning = true;
+    refreshPending = false;
+    lastAutoRefresh = now;
+    try {
+      await navigate(App.currentPage, { silent: true });
+    } finally {
+      autoRefreshRunning = false;
+    }
+  }
+
+  Api.onChange(() => {
+    refreshPending = true;
+    refreshCurrentPage();
+  });
+
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) refreshCurrentPage();
+  });
+  window.addEventListener('focus', () => refreshCurrentPage());
 
   function statCard(label, value, icon, tone = '', page = '') {
     const tag = page ? 'button' : 'article';
@@ -176,6 +215,8 @@
     if (user.mustChangePassword) return window.location.replace(Portal.url('/change-password.html'));
     App.me = user;
     App.settings = setup.settings;
-    renderOrganization(); renderAccount(); renderMenu(); navigate('overview');
+    renderOrganization(); renderAccount(); renderMenu(); navigate('overview').then(() => {
+      if (refreshPending) refreshCurrentPage();
+    });
   }).catch(() => window.location.replace(Portal.url('/login.html')));
 })();
